@@ -1,0 +1,105 @@
+@page
+@model ServicePult.Pages.Dispatcher.IndexModel
+@{
+    ViewData["Title"] = "Пульт диспетчера";
+}
+<h1>Заявки</h1>
+
+<form method="get" class="filters">
+    <label>Показать
+        <select name="Show">
+            <option value="active" selected="@(Model.Show != "all" && Model.Show != "closed")">в работе</option>
+            <option value="all" selected="@(Model.Show == "all")">все</option>
+            <option value="closed" selected="@(Model.Show == "closed")">завершённые</option>
+        </select>
+    </label>
+    <label>Инженер
+        <select name="EngineerId">
+            <option value="">все инженеры</option>
+            @foreach (var e in Model.Engineers)
+            {
+                <option value="@e.Id" selected="@(Model.EngineerId == e.Id)">@e.FullName</option>
+            }
+        </select>
+    </label>
+    <label>Заказчик
+        <select name="CustomerId">
+            <option value="">все заказчики</option>
+            @foreach (var c in Model.Customers)
+            {
+                <option value="@c.Id" selected="@(Model.CustomerId == c.Id)">@c.Name</option>
+            }
+        </select>
+    </label>
+    <button type="submit">Применить</button>
+    <a class="button secondary" href="/Dispatcher/New">+ Новая заявка</a>
+    <span class="muted small" style="margin-left:auto">Обновлено @Format.Time(Model.Now) (МСК), страница обновляется раз в минуту</span>
+</form>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Зарегистрирована</th>
+                <th>Заказчик</th>
+                <th>Объект</th>
+                <th>Вид работ</th>
+                <th>SLA</th>
+                <th>Инженер</th>
+                <th>Статус</th>
+                <th>Срок</th>
+                <th class="num">Остаток</th>
+                <th>Признак</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Rows.Count == 0)
+            {
+                <tr><td colspan="11" class="muted">Заявок нет</td></tr>
+            }
+            @foreach (var row in Model.Rows)
+            {
+                var r = row.Request;
+                var ind = row.Indicator;
+                var rowCss = ind == null || row.Finished ? "" : "row-" + Format.StateCss(ind.State).Substring(4);
+                <tr class="@rowCss">
+                    <td class="nowrap"><a href="/Dispatcher/Request/@r.Id">@r.Number</a></td>
+                    <td class="nowrap">@Format.Time(r.RegisteredAt)</td>
+                    <td>@r.Contract!.Customer!.Name</td>
+                    <td class="nowrap" title="@r.Site!.Address">@r.Site.Code</td>
+                    <td>@r.WorkType!.Name</td>
+                    <td class="nowrap">@r.SlaLevel!.Code.Trim()</td>
+                    <td class="nowrap">@(r.Engineer == null ? "не назначен" : Format.ShortName(r.Engineer.FullName))</td>
+                    <td class="status">
+                        @RequestStatusRules.Title(r.Status)
+                        @if (!r.TimeTrusted)
+                        {
+                            <div><span class="badge warn" title="Отметки времени сделаны по часам телефона без опорной синхронизации">время не доверенное</span></div>
+                        }
+                    </td>
+                    @if (ind == null)
+                    {
+                        <td class="muted">—</td>
+                        <td class="num muted">—</td>
+                        <td class="muted">—</td>
+                    }
+                    else
+                    {
+                        <td class="nowrap">
+                            <span class="muted small">@(ind.Stage == SlaStage.Reaction ? "реакция" : "устранение")</span><br />
+                            @Format.Time(ind.Due)
+                        </td>
+                        <td class="num">@(ind.Remaining == null ? "—" : Format.Duration(ind.Remaining.Value))</td>
+                        <td><span class="sla @Format.StateCss(ind.State)">@Format.StateTitle(ind.State)</span></td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<p class="muted small">
+    Срок: до прибытия инженера — срок реакции, после прибытия — срок устранения.
+    Остаток для SLA-2 и SLA-3 — в рабочем времени (пн–пт 9:00–18:00 по производственному календарю), для SLA-1 — круглосуточно.
+    «Под угрозой» — осталось меньше четверти времени этапа. У выполненных и закрытых заявок признак показывает, уложились ли в срок устранения.
+</p>

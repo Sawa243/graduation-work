@@ -1,0 +1,55 @@
+@{
+    var signedIn = User.Identity?.IsAuthenticated == true && User.Identity.AuthenticationType == Program.PultScheme;
+    var isHead = signedIn && User.IsInRole("3");
+    var path = Context.Request.Path.Value ?? "";
+    string Active(string prefix) => path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @if (ViewData["Refresh"] is int seconds)
+    {
+        <meta http-equiv="refresh" content="@seconds" />
+    }
+    <title>@ViewData["Title"] — Сервисный пульт</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="/Dispatcher">Сервисный пульт</a>
+        @if (signedIn)
+        {
+            <nav>
+                <a class="@(path.Equals("/Dispatcher", StringComparison.OrdinalIgnoreCase) || path.StartsWith("/Dispatcher/Request", StringComparison.OrdinalIgnoreCase) ? "active" : "")" href="/Dispatcher">Заявки</a>
+                <a class="@Active("/Dispatcher/New")" href="/Dispatcher/New">Новая заявка</a>
+                <a class="@Active("/Directories")" href="/Directories/Customers">Справочники</a>
+                @if (isHead)
+                {
+                    <a class="@Active("/Reports")" href="/Reports/Sla">Отчёт по SLA</a>
+                }
+            </nav>
+            <div class="user">
+                <span>@User.Identity!.Name <span class="muted">(@Format.RoleTitle(short.Parse(User.FindFirst("role")!.Value)))</span></span>
+                <form method="post" action="/Account/Logout">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="link">Выйти</button>
+                </form>
+            </div>
+        }
+    </header>
+    <main>
+        @if (TempData["Message"] is string message)
+        {
+            <div class="notice ok">@message</div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="notice error">@error</div>
+        }
+        @RenderBody()
+    </main>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

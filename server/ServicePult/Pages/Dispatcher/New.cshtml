@@ -1,0 +1,110 @@
+@page
+@model ServicePult.Pages.Dispatcher.NewModel
+@{
+    ViewData["Title"] = "Новая заявка";
+}
+<h1>Новая заявка</h1>
+
+<form method="post" class="form" id="new-request">
+    @if (Model.Errors.Count > 0)
+    {
+        <div class="notice error">
+            Заявка не сохранена:
+            <ul>
+                @foreach (var e in Model.Errors)
+                {
+                    <li>@e</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="field">
+        <label for="ContractId">Договор</label>
+        <select asp-for="ContractId" id="ContractId" required>
+            <option value="">— выберите договор —</option>
+            @foreach (var c in Model.Contracts)
+            {
+                <option value="@c.Id" data-customer="@c.CustomerId" data-max-sla="@c.MaxSla">
+                    @c.Number — @c.Customer!.Name (@(c.DateTo == null ? "бессрочный" : "до " + Format.Date(c.DateTo)))
+                </option>
+            }
+        </select>
+        <div class="hint">Показаны договоры, действующие сегодня.</div>
+    </div>
+
+    <div class="field">
+        <label for="SiteId">Объект</label>
+        <select asp-for="SiteId" id="SiteId" required>
+            <option value="">— выберите объект —</option>
+            @foreach (var s in Model.Sites)
+            {
+                <option value="@s.Id" data-customer="@s.CustomerId">@s.Code — @s.Address</option>
+            }
+        </select>
+        <div class="hint">Только объекты заказчика по договору.</div>
+    </div>
+
+    <div class="field">
+        <label for="EquipmentId">Оборудование <span class="muted">(необязательно)</span></label>
+        <select asp-for="EquipmentId" id="EquipmentId">
+            <option value="">— не указано —</option>
+            @foreach (var e in Model.EquipmentList)
+            {
+                <option value="@e.Id" data-site="@e.SiteId">@e.InvCode — @e.Vendor @e.Model</option>
+            }
+        </select>
+    </div>
+
+    <div class="field">
+        <label for="WorkTypeId">Вид работ</label>
+        <select asp-for="WorkTypeId" required>
+            <option value="">— выберите вид работ —</option>
+            @foreach (var w in Model.WorkTypes)
+            {
+                <option value="@w.Id">@w.Code — @w.Name</option>
+            }
+        </select>
+    </div>
+
+    <div class="field">
+        <label for="SlaLevelId">Уровень SLA</label>
+        <select asp-for="SlaLevelId" id="SlaLevelId" required>
+            <option value="">— выберите уровень —</option>
+            @foreach (var l in Model.SlaLevels)
+            {
+                <option value="@l.Id" data-level="@RequestService.LevelNumber(l)">
+                    @l.Code.Trim() «@l.Name»: реакция @Format.Minutes(l.ReactionMin),
+                    устранение @Format.Minutes(l.ResolutionMin),
+                    @(l.Mode == SlaService.Mode24x7 ? "круглосуточно" : "рабочее время")
+                </option>
+            }
+        </select>
+        <div class="hint" id="sla-hint">Доступны уровни не выше разрешённого договором.</div>
+    </div>
+
+    <div class="field">
+        <label for="Description">Описание неисправности</label>
+        <textarea asp-for="Description" maxlength="@RequestService.MaxDescription" required></textarea>
+    </div>
+
+    <div class="field">
+        <label for="EngineerId">Инженер <span class="muted">(необязательно)</span></label>
+        <select asp-for="EngineerId">
+            <option value="">— назначить позже —</option>
+            @foreach (var e in Model.Engineers)
+            {
+                <option value="@e.Id">@e.FullName (таб. № @e.TabNo)</option>
+            }
+        </select>
+        <div class="hint">Если инженер выбран, заявка сразу получает статус «Назначена».</div>
+    </div>
+
+    <p class="muted small">Сроки реакции и устранения рассчитываются при сохранении от текущего времени по уровню SLA и производственному календарю.</p>
+    <button type="submit">Зарегистрировать</button>
+    <a class="button secondary" href="/Dispatcher">Отмена</a>
+</form>
+
+@section Scripts {
+    <script src="~/js/new-request.js" asp-append-version="true"></script>
+}

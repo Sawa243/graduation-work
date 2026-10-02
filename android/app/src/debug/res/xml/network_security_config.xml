@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Отладочная сборка: открытый HTTP разрешён только к 10.0.2.2 — так эмулятор видит
+     компьютер разработчика, где запущен сервер. Ко всем остальным адресам — только HTTPS.
+     Этот файл заменяет main/res/xml/network_security_config.xml только в debug. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

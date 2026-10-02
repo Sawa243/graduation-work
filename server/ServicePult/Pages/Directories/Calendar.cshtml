@@ -1,0 +1,69 @@
+@page
+@model ServicePult.Pages.Directories.CalendarModel
+@{
+    ViewData["Title"] = "Производственный календарь";
+    var ru = System.Globalization.CultureInfo.GetCultureInfo("ru-RU");
+}
+<partial name="_Nav" />
+
+<p class="muted">
+    Обычные дни не хранятся: понедельник–пятница — рабочие, суббота и воскресенье — выходные.
+    Здесь — только исключения. Календарь влияет на сроки новых заявок: сроки уже зарегистрированных заявок фиксируются при регистрации и не пересчитываются.
+</p>
+
+<div class="grid2">
+    <div>
+        <nav class="subnav">
+            @foreach (var y in Model.Years)
+            {
+                <a class="@(y == Model.Year ? "active" : "")" href="?Year=@y">@y</a>
+            }
+        </nav>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Дата</th><th>День недели</th><th>Вид</th><th>Примечание</th><th></th></tr></thead>
+                <tbody>
+                    @if (Model.Items.Count == 0)
+                    {
+                        <tr><td colspan="5" class="muted">Исключений за @Model.Year год нет</td></tr>
+                    }
+                    @foreach (var d in Model.Items)
+                    {
+                        <tr>
+                            <td class="nowrap">@Format.Date(d.Day)</td>
+                            <td>@d.Day.ToString("dddd", ru)</td>
+                            <td>@(d.IsWorking ? "рабочий" : "нерабочий")</td>
+                            <td>@(d.Note ?? "")</td>
+                            <td>
+                                <form method="post" asp-page-handler="Delete" asp-route-day="@d.Day.ToString("yyyy-MM-dd")" style="margin:0">
+                                    <button type="submit" class="secondary">Удалить</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <form method="post" asp-page-handler="Add" class="panel">
+        <h2>Добавить или изменить день</h2>
+        @if (Model.Error != null)
+        {
+            <div class="notice error">@Model.Error</div>
+        }
+        <div class="field">
+            <label for="Day">Дата</label>
+            <input type="date" id="Day" name="Day" required />
+        </div>
+        <div class="field">
+            <label><input type="radio" name="IsWorking" value="false" checked /> нерабочий (праздник, перенесённый выходной)</label>
+            <label><input type="radio" name="IsWorking" value="true" /> рабочий (рабочая суббота)</label>
+        </div>
+        <div class="field">
+            <label for="Note">Примечание</label>
+            <input type="text" id="Note" name="Note" maxlength="60" style="width:100%" />
+        </div>
+        <button type="submit">Сохранить</button>
+    </form>
+</div>

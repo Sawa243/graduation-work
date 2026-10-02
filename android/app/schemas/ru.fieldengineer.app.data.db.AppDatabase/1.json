@@ -1,0 +1,1505 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "2ebb979dfc3e229293d04c58acecda7c",
+    "entities": [
+      {
+        "tableName": "customer",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `code` TEXT NOT NULL, `name` TEXT NOT NULL, `inn` TEXT NOT NULL, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inn",
+            "columnName": "inn",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_customer_code",
+            "unique": true,
+            "columnNames": [
+              "code"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_customer_code` ON `${TABLE_NAME}` (`code`)"
+          }
+        ]
+      },
+      {
+        "tableName": "contract",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `number` TEXT NOT NULL, `customer_id` INTEGER NOT NULL, `date_from` TEXT NOT NULL, `date_to` TEXT, `max_sla` INTEGER NOT NULL, `e_sign_allowed` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`customer_id`) REFERENCES `customer`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerId",
+            "columnName": "customer_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateFrom",
+            "columnName": "date_from",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateTo",
+            "columnName": "date_to",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "maxSla",
+            "columnName": "max_sla",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eSignAllowed",
+            "columnName": "e_sign_allowed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_contract_number",
+            "unique": true,
+            "columnNames": [
+              "number"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_contract_number` ON `${TABLE_NAME}` (`number`)"
+          },
+          {
+            "name": "index_contract_customer_id",
+            "unique": false,
+            "columnNames": [
+              "customer_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_contract_customer_id` ON `${TABLE_NAME}` (`customer_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "customer",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "customer_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "sla_level",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `code` TEXT NOT NULL, `name` TEXT NOT NULL, `reaction_min` INTEGER NOT NULL, `resolution_min` INTEGER NOT NULL, `mode` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reactionMin",
+            "columnName": "reaction_min",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resolutionMin",
+            "columnName": "resolution_min",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mode",
+            "columnName": "mode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sla_level_code",
+            "unique": true,
+            "columnNames": [
+              "code"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_sla_level_code` ON `${TABLE_NAME}` (`code`)"
+          }
+        ]
+      },
+      {
+        "tableName": "site",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `code` TEXT NOT NULL, `customer_id` INTEGER NOT NULL, `address` TEXT NOT NULL, `contact_name` TEXT, `contact_phone` TEXT, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`customer_id`) REFERENCES `customer`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerId",
+            "columnName": "customer_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contactName",
+            "columnName": "contact_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contactPhone",
+            "columnName": "contact_phone",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_site_code",
+            "unique": true,
+            "columnNames": [
+              "code"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_site_code` ON `${TABLE_NAME}` (`code`)"
+          },
+          {
+            "name": "index_site_customer_id",
+            "unique": false,
+            "columnNames": [
+              "customer_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_site_customer_id` ON `${TABLE_NAME}` (`customer_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "customer",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "customer_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "equipment",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `inv_code` TEXT NOT NULL, `site_id` INTEGER NOT NULL, `vendor` TEXT NOT NULL, `model` TEXT NOT NULL, `serial_no` TEXT, `warranty_to` TEXT, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`site_id`) REFERENCES `site`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "invCode",
+            "columnName": "inv_code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "siteId",
+            "columnName": "site_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vendor",
+            "columnName": "vendor",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "model",
+            "columnName": "model",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serialNo",
+            "columnName": "serial_no",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "warrantyTo",
+            "columnName": "warranty_to",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_equipment_inv_code",
+            "unique": true,
+            "columnNames": [
+              "inv_code"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_equipment_inv_code` ON `${TABLE_NAME}` (`inv_code`)"
+          },
+          {
+            "name": "index_equipment_site_id",
+            "unique": false,
+            "columnNames": [
+              "site_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_equipment_site_id` ON `${TABLE_NAME}` (`site_id`)"
+          },
+          {
+            "name": "index_equipment_serial_no",
+            "unique": false,
+            "columnNames": [
+              "serial_no"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_equipment_serial_no` ON `${TABLE_NAME}` (`serial_no`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "site",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "site_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "work_type",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `code` TEXT NOT NULL, `name` TEXT NOT NULL, `norm_min` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "normMin",
+            "columnName": "norm_min",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_work_type_code",
+            "unique": true,
+            "columnNames": [
+              "code"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_work_type_code` ON `${TABLE_NAME}` (`code`)"
+          }
+        ]
+      },
+      {
+        "tableName": "checklist_item",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `work_type_id` INTEGER NOT NULL, `pos` INTEGER NOT NULL, `text` TEXT NOT NULL, `required` INTEGER NOT NULL, `need_photo` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`work_type_id`) REFERENCES `work_type`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workTypeId",
+            "columnName": "work_type_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pos",
+            "columnName": "pos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text",
+            "columnName": "text",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "required",
+            "columnName": "required",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "needPhoto",
+            "columnName": "need_photo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_checklist_item_work_type_id",
+            "unique": false,
+            "columnNames": [
+              "work_type_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_checklist_item_work_type_id` ON `${TABLE_NAME}` (`work_type_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "work_type",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "work_type_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "employee",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `tab_no` TEXT NOT NULL, `full_name` TEXT NOT NULL, `position` TEXT NOT NULL, `role` INTEGER NOT NULL, `phone` TEXT, `login` TEXT NOT NULL, `blocked` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tabNo",
+            "columnName": "tab_no",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fullName",
+            "columnName": "full_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "role",
+            "columnName": "role",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone",
+            "columnName": "phone",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "login",
+            "columnName": "login",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "blocked",
+            "columnName": "blocked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_employee_tab_no",
+            "unique": true,
+            "columnNames": [
+              "tab_no"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_employee_tab_no` ON `${TABLE_NAME}` (`tab_no`)"
+          },
+          {
+            "name": "index_employee_login",
+            "unique": true,
+            "columnNames": [
+              "login"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_employee_login` ON `${TABLE_NAME}` (`login`)"
+          }
+        ]
+      },
+      {
+        "tableName": "calendar_day",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`day` TEXT NOT NULL, `is_working` INTEGER NOT NULL, `note` TEXT, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`day`))",
+        "fields": [
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isWorking",
+            "columnName": "is_working",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "day"
+          ]
+        }
+      },
+      {
+        "tableName": "request",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `number` TEXT NOT NULL, `contract_id` INTEGER NOT NULL, `site_id` INTEGER NOT NULL, `equipment_id` INTEGER, `work_type_id` INTEGER NOT NULL, `sla_level_id` INTEGER NOT NULL, `dispatcher_id` INTEGER NOT NULL, `engineer_id` INTEGER, `parent_id` INTEGER, `description` TEXT NOT NULL, `registered_at` INTEGER NOT NULL, `reaction_due` INTEGER NOT NULL, `resolution_due` INTEGER NOT NULL, `arrived_at` INTEGER, `completed_at` INTEGER, `closed_at` INTEGER, `status` INTEGER NOT NULL, `scanned_code` TEXT, `result_text` TEXT, `cancel_reason` TEXT, `time_trusted` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`contract_id`) REFERENCES `contract`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`site_id`) REFERENCES `site`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`equipment_id`) REFERENCES `equipment`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`work_type_id`) REFERENCES `work_type`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`sla_level_id`) REFERENCES `sla_level`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`dispatcher_id`) REFERENCES `employee`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`engineer_id`) REFERENCES `employee`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`parent_id`) REFERENCES `request`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contractId",
+            "columnName": "contract_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "siteId",
+            "columnName": "site_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "equipmentId",
+            "columnName": "equipment_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "workTypeId",
+            "columnName": "work_type_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "slaLevelId",
+            "columnName": "sla_level_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dispatcherId",
+            "columnName": "dispatcher_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "engineerId",
+            "columnName": "engineer_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "parentId",
+            "columnName": "parent_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "registeredAt",
+            "columnName": "registered_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reactionDue",
+            "columnName": "reaction_due",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resolutionDue",
+            "columnName": "resolution_due",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arrivedAt",
+            "columnName": "arrived_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "completedAt",
+            "columnName": "completed_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "closedAt",
+            "columnName": "closed_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scannedCode",
+            "columnName": "scanned_code",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "resultText",
+            "columnName": "result_text",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cancelReason",
+            "columnName": "cancel_reason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "timeTrusted",
+            "columnName": "time_trusted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_request_number",
+            "unique": true,
+            "columnNames": [
+              "number"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_request_number` ON `${TABLE_NAME}` (`number`)"
+          },
+          {
+            "name": "index_request_contract_id",
+            "unique": false,
+            "columnNames": [
+              "contract_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_request_contract_id` ON `${TABLE_NAME}` (`contract_id`)"
+          },
+          {
+            "name": "index_request_site_id",
+            "unique": false,
+            "columnNames": [
+              "site_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_request_site_id` ON `${TABLE_NAME}` (`site_id`)"
+          },
+          {
+            "name": "index_request_equipment_id",
+            "unique": false,
+            "columnNames": [
+              "equipment_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_request_equipment_id` ON `${TABLE_NAME}` (`equipment_id`)"
+          },
+          {
+            "name": "index_request_work_type_id",
+            "unique": false,
+            "columnNames": [
+              "work_type_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_request_work_type_id` ON `${TABLE_NAME}` (`work_type_id`)"
+          },
+          {
+            "name": "index_request_sla_level_id",
+            "unique": false,
+            "columnNames": [
+              "sla_level_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_request_sla_level_id` ON `${TABLE_NAME}` (`sla_level_id`)"
+          },
+          {
+            "name": "index_request_dispatcher_id",
+            "unique": false,
+            "columnNames": [
+              "dispatcher_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_request_dispatcher_id` ON `${TABLE_NAME}` (`dispatcher_id`)"
+          },
+          {
+            "name": "index_request_engineer_id",
+            "unique": false,
+            "columnNames": [
+              "engineer_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_request_engineer_id` ON `${TABLE_NAME}` (`engineer_id`)"
+          },
+          {
+            "name": "index_request_parent_id",
+            "unique": false,
+            "columnNames": [
+              "parent_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_request_parent_id` ON `${TABLE_NAME}` (`parent_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "contract",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "contract_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "site",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "site_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "equipment",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "equipment_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "work_type",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "work_type_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "sla_level",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "sla_level_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "employee",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "dispatcher_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "employee",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "engineer_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "request",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "parent_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "checklist_result",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `request_id` INTEGER NOT NULL, `checklist_item_id` INTEGER NOT NULL, `done` INTEGER NOT NULL, `comment` TEXT, `done_at` INTEGER, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`request_id`) REFERENCES `request`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`checklist_item_id`) REFERENCES `checklist_item`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestId",
+            "columnName": "request_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "checklistItemId",
+            "columnName": "checklist_item_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "done",
+            "columnName": "done",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "comment",
+            "columnName": "comment",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "doneAt",
+            "columnName": "done_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_checklist_result_request_id_checklist_item_id",
+            "unique": true,
+            "columnNames": [
+              "request_id",
+              "checklist_item_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_checklist_result_request_id_checklist_item_id` ON `${TABLE_NAME}` (`request_id`, `checklist_item_id`)"
+          },
+          {
+            "name": "index_checklist_result_checklist_item_id",
+            "unique": false,
+            "columnNames": [
+              "checklist_item_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_checklist_result_checklist_item_id` ON `${TABLE_NAME}` (`checklist_item_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "request",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "request_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "checklist_item",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "checklist_item_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "photo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `request_id` INTEGER NOT NULL, `checklist_item_id` INTEGER, `kind` INTEGER NOT NULL, `file_name` TEXT NOT NULL, `taken_at` INTEGER NOT NULL, `sha256` TEXT NOT NULL, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`request_id`) REFERENCES `request`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`checklist_item_id`) REFERENCES `checklist_item`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestId",
+            "columnName": "request_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "checklistItemId",
+            "columnName": "checklist_item_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileName",
+            "columnName": "file_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "takenAt",
+            "columnName": "taken_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sha256",
+            "columnName": "sha256",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_photo_request_id",
+            "unique": false,
+            "columnNames": [
+              "request_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_photo_request_id` ON `${TABLE_NAME}` (`request_id`)"
+          },
+          {
+            "name": "index_photo_checklist_item_id",
+            "unique": false,
+            "columnNames": [
+              "checklist_item_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_photo_checklist_item_id` ON `${TABLE_NAME}` (`checklist_item_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "request",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "request_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "checklist_item",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "checklist_item_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "work_log",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `request_id` INTEGER NOT NULL, `employee_id` INTEGER NOT NULL, `kind` INTEGER NOT NULL, `started_at` INTEGER NOT NULL, `ended_at` INTEGER, `time_trusted` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`request_id`) REFERENCES `request`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`employee_id`) REFERENCES `employee`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestId",
+            "columnName": "request_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "employeeId",
+            "columnName": "employee_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAt",
+            "columnName": "started_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedAt",
+            "columnName": "ended_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "timeTrusted",
+            "columnName": "time_trusted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_work_log_request_id",
+            "unique": false,
+            "columnNames": [
+              "request_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_work_log_request_id` ON `${TABLE_NAME}` (`request_id`)"
+          },
+          {
+            "name": "index_work_log_employee_id",
+            "unique": false,
+            "columnNames": [
+              "employee_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_work_log_employee_id` ON `${TABLE_NAME}` (`employee_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "request",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "request_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "employee",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "employee_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "act",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `request_id` INTEGER NOT NULL, `number` TEXT NOT NULL, `act_date` TEXT NOT NULL, `engineer_id` INTEGER NOT NULL, `sign_mode` INTEGER NOT NULL, `signer_name` TEXT, `signer_position` TEXT, `signature_file` TEXT, `pdf_file` TEXT NOT NULL, `signed_at` INTEGER, `sha256` TEXT NOT NULL, `work_min` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `sync_state` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`request_id`) REFERENCES `request`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`engineer_id`) REFERENCES `employee`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestId",
+            "columnName": "request_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actDate",
+            "columnName": "act_date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "engineerId",
+            "columnName": "engineer_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "signMode",
+            "columnName": "sign_mode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "signerName",
+            "columnName": "signer_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "signerPosition",
+            "columnName": "signer_position",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "signatureFile",
+            "columnName": "signature_file",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pdfFile",
+            "columnName": "pdf_file",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "signedAt",
+            "columnName": "signed_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sha256",
+            "columnName": "sha256",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workMin",
+            "columnName": "work_min",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "sync_state",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_act_request_id",
+            "unique": true,
+            "columnNames": [
+              "request_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_act_request_id` ON `${TABLE_NAME}` (`request_id`)"
+          },
+          {
+            "name": "index_act_number",
+            "unique": true,
+            "columnNames": [
+              "number"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_act_number` ON `${TABLE_NAME}` (`number`)"
+          },
+          {
+            "name": "index_act_engineer_id",
+            "unique": false,
+            "columnNames": [
+              "engineer_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_act_engineer_id` ON `${TABLE_NAME}` (`engineer_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "request",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "request_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "employee",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "engineer_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2ebb979dfc3e229293d04c58acecda7c')"
+    ]
+  }
+}

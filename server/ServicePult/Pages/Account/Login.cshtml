@@ -1,0 +1,25 @@
+@page
+@model ServicePult.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Вход";
+}
+<div class="login">
+    <h1>Вход на пульт</h1>
+    <form method="post" class="form">
+        @if (Model.Error != null)
+        {
+            <div class="notice error">@Model.Error</div>
+        }
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div class="field">
+            <label asp-for="Login">Логин</label>
+            <input asp-for="Login" type="text" autocomplete="username" autofocus required />
+        </div>
+        <div class="field">
+            <label asp-for="Password">Пароль</label>
+            <input asp-for="Password" type="password" autocomplete="current-password" required value="" />
+        </div>
+        <button type="submit">Войти</button>
+    </form>
+    <p class="muted small">Для диспетчеров и руководителя сервисной службы.</p>
+</div>

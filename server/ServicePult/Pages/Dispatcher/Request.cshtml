@@ -1,0 +1,105 @@
+@page "{id:int}"
+@model ServicePult.Pages.Dispatcher.RequestModel
+@{
+    var r = Model.Item;
+    ViewData["Title"] = "Заявка " + r.Number;
+}
+<p><a href="/Dispatcher">← К заявкам</a></p>
+<h1>
+    Заявка @r.Number
+    <span class="muted" style="font-size:16px">— @RequestStatusRules.Title(r.Status)</span>
+    @if (Model.Indicator != null)
+    {
+        <span class="sla @Format.StateCss(Model.Indicator.State)">@Format.StateTitle(Model.Indicator.State)</span>
+    }
+    @if (!r.TimeTrusted)
+    {
+        <span class="badge warn">время не доверенное</span>
+    }
+</h1>
+
+<div class="grid2">
+    <div class="panel">
+        <h2>Реквизиты</h2>
+        <dl class="props">
+            <dt>Заказчик</dt><dd>@r.Contract!.Customer!.Name</dd>
+            <dt>Договор</dt><dd>@r.Contract.Number</dd>
+            <dt>Объект</dt><dd>@r.Site!.Code, @r.Site.Address</dd>
+            <dt>Контакт на объекте</dt><dd>@(r.Site.ContactName ?? "—") @r.Site.ContactPhone</dd>
+            <dt>Оборудование</dt>
+            <dd>@(r.Equipment == null ? "не указано" : $"{r.Equipment.InvCode} — {r.Equipment.Vendor} {r.Equipment.Model}")</dd>
+            <dt>Вид работ</dt><dd>@r.WorkType!.Code @r.WorkType.Name</dd>
+            <dt>Описание</dt><dd>@r.Description</dd>
+            <dt>Зарегистрировал</dt><dd>@r.Dispatcher!.FullName</dd>
+            <dt>Инженер</dt><dd>@(r.Engineer?.FullName ?? "не назначен")</dd>
+            @if (r.Parent != null)
+            {
+                <dt>Повторный выезд по</dt><dd><a href="/Dispatcher/Request/@r.Parent.Id">@r.Parent.Number</a></dd>
+            }
+            @if (r.ResultText != null)
+            {
+                <dt>Что сделано</dt><dd>@r.ResultText</dd>
+            }
+            @if (r.CancelReason != null)
+            {
+                <dt>Причина отмены</dt><dd>@r.CancelReason</dd>
+            }
+        </dl>
+    </div>
+
+    <div class="panel">
+        <h2>Сроки (@r.SlaLevel!.Code.Trim() «@r.SlaLevel.Name»)</h2>
+        <dl class="props">
+            <dt>Зарегистрирована</dt><dd>@Format.Time(r.RegisteredAt)</dd>
+            <dt>Срок реакции</dt><dd>@Format.Time(r.ReactionDue)</dd>
+            <dt>Срок устранения</dt><dd>@Format.Time(r.ResolutionDue)</dd>
+            <dt>Прибытие</dt><dd>@Format.Time(r.ArrivedAt)</dd>
+            <dt>Работы выполнены</dt><dd>@Format.Time(r.CompletedAt)</dd>
+            <dt>Закрыта</dt><dd>@Format.Time(r.ClosedAt)</dd>
+            @if (Model.Indicator?.Remaining != null)
+            {
+                <dt>Остаток</dt><dd>@Format.Duration(Model.Indicator.Remaining.Value)</dd>
+            }
+        </dl>
+        <p class="muted small">Время — московское.</p>
+    </div>
+</div>
+
+<h2>Действия</h2>
+@if (Model.CanChange)
+{
+    <div class="grid2">
+        <form method="post" asp-page-handler="Assign" class="panel">
+            <h2>@(r.EngineerId == null ? "Назначить инженера" : "Переназначить инженера")</h2>
+            <div class="field">
+                <select asp-for="EngineerId">
+                    <option value="">— выберите инженера —</option>
+                    @foreach (var e in Model.Engineers)
+                    {
+                        <option value="@e.Id">@e.FullName (таб. № @e.TabNo)</option>
+                    }
+                </select>
+            </div>
+            <p><button type="submit">@(r.EngineerId == null ? "Назначить" : "Переназначить")</button></p>
+        </form>
+        <form method="post" asp-page-handler="Cancel" class="panel">
+            <h2>Отменить заявку</h2>
+            <div class="field">
+                <input asp-for="CancelReason" type="text" maxlength="@RequestService.MaxCancelReason"
+                       placeholder="Причина отмены (обязательно)" style="width:100%" required />
+            </div>
+            <p><button type="submit" class="danger">Отменить заявку</button></p>
+        </form>
+    </div>
+}
+else if (r.Status is RequestStatus.OnTheWay or RequestStatus.OnSite)
+{
+    <div class="notice info">
+        Инженер уже выехал или работает на объекте. Отменить или переназначить заявку в статусе
+        «@RequestStatusRules.Title(r.Status)» можно только с подтверждением инженера — этап развития.
+    </div>
+}
+else
+{
+    <div class="notice info">Заявка в статусе «@RequestStatusRules.Title(r.Status)» диспетчером не меняется.</div>
+}

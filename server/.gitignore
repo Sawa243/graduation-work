@@ -1,0 +1,10 @@
+# файлы, загруженные с телефонов, и журналы сервера
+App_Data/
+logs/
+
+# сборка .NET и настройки среды разработчика
+bin/
+obj/
+*.user
+# пароль базы и ключ токенов; образец без секретов — appsettings.Development.example.json
+appsettings.Development.json

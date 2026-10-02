@@ -1,0 +1,31 @@
+@page
+@model ServicePult.Pages.Directories.CustomersModel
+@{
+    ViewData["Title"] = "Заказчики";
+}
+<partial name="_Nav" />
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr><th>Код</th><th>Наименование</th><th>ИНН</th><th>Договоры</th><th class="num">Объектов</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var c in Model.Items)
+            {
+                <tr>
+                    <td>@c.Customer.Code</td>
+                    <td>@c.Customer.Name</td>
+                    <td>@c.Customer.Inn</td>
+                    <td>
+                        @foreach (var k in c.Contracts)
+                        {
+                            <div>@k.Number, с @Format.Date(k.DateFrom) по @(k.DateTo == null ? "бессрочно" : Format.Date(k.DateTo)),
+                                <span class="muted">SLA не выше SLA-@k.MaxSla@(k.ESignAllowed ? ", простая ЭП" : "")</span></div>
+                        }
+                    </td>
+                    <td class="num">@c.SiteCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

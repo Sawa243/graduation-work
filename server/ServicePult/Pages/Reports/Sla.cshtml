@@ -1,0 +1,111 @@
+@page
+@model ServicePult.Pages.Reports.SlaModel
+@{
+    ViewData["Title"] = "Отчёт по SLA";
+    var rep = Model.Report;
+}
+<h1>Отчёт о выполнении SLA</h1>
+
+<form method="get" class="filters">
+    <label>С <input type="date" name="From" value="@Model.From?.ToString("yyyy-MM-dd")" /></label>
+    <label>по <input type="date" name="To" value="@Model.To?.ToString("yyyy-MM-dd")" /></label>
+    <button type="submit">Показать</button>
+    <span class="muted small">Период: @Format.Date(rep.Period.FirstDay) — @Format.Date(rep.Period.LastDay), границы суток — по московскому времени</span>
+</form>
+@if (Model.Error != null)
+{
+    <div class="notice error">@Model.Error</div>
+}
+
+<div class="kpis">
+    <div class="kpi"><div class="value">@rep.Total.Total</div><div class="label">заявок закрыто за период</div></div>
+    <div class="kpi"><div class="value">@Format.Percent(rep.Total.ResolvedPercent)</div><div class="label">устранено в срок (@rep.Total.ResolvedInTime из @rep.Total.Total)</div></div>
+    <div class="kpi"><div class="value">@Format.Percent(rep.Total.ReactedPercent)</div><div class="label">реакций в срок (@rep.Total.ReactedInTime из @rep.Total.Total)</div></div>
+    <div class="kpi"><div class="value">@rep.UntrustedCount</div><div class="label">с недоверенным временем</div></div>
+</div>
+
+@{
+    void SlaTable(string title, IReadOnlyList<SlaRow> rows)
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>@title</th>
+                        <th class="num">Закрыто</th>
+                        <th class="num">Устранено в срок</th>
+                        <th class="num">%</th>
+                        <th class="num">Реакций в срок</th>
+                        <th class="num">%</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in rows)
+                    {
+                        <tr>
+                            <td>@row.Name</td>
+                            <td class="num">@row.Total</td>
+                            <td class="num">@row.ResolvedInTime</td>
+                            <td class="num">@Format.Percent(row.ResolvedPercent)</td>
+                            <td class="num">@row.ReactedInTime</td>
+                            <td class="num">@Format.Percent(row.ReactedPercent)</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Итого</td>
+                        <td class="num">@rep.Total.Total</td>
+                        <td class="num">@rep.Total.ResolvedInTime</td>
+                        <td class="num">@Format.Percent(rep.Total.ResolvedPercent)</td>
+                        <td class="num">@rep.Total.ReactedInTime</td>
+                        <td class="num">@Format.Percent(rep.Total.ReactedPercent)</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+}
+
+<div class="grid2">
+    <div>
+        <h2>По уровням SLA</h2>
+        @{ SlaTable("Уровень SLA", rep.ByLevel); }
+    </div>
+    <div>
+        <h2>По заказчикам</h2>
+        @{ SlaTable("Заказчик", rep.ByCustomer); }
+    </div>
+</div>
+
+<h2>Загрузка инженеров</h2>
+<div class="table-wrap" style="max-width:760px">
+    <table>
+        <thead>
+            <tr>
+                <th>Инженер</th>
+                <th class="num">Закрыто заявок</th>
+                <th class="num">Работа на объектах, мин</th>
+                <th class="num">ч:мин</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in rep.Engineers)
+            {
+                <tr>
+                    <td>@e.Name</td>
+                    <td class="num">@e.Closed</td>
+                    <td class="num">@e.WorkMinutes</td>
+                    <td class="num">@(e.WorkMinutes / 60):@((e.WorkMinutes % 60).ToString("00"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<p class="muted small">
+    В отчёт входят заявки со статусом «Закрыта», закрытые в периоде (по дате закрытия); отменённые и приостановленные не учитываются.
+    Устранено в срок — работы выполнены не позже срока устранения; реакция в срок — прибытие не позже срока реакции.
+    Проценты округлены до целого. Работа на объектах — интервалы «работа» с обрезкой по границам периода (незавершённые — до текущего момента).
+    Недоверенное время — отметки сделаны по часам телефона без опорной синхронизации, их стоит проверить.
+</p>

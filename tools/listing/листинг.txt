@@ -1,0 +1,738 @@
+Листинг 1 — SlaCalculator.kt (расчёт сроков по SLA), операторов: 67
+
+/** Сроки SLA считаются по московскому времени (проект системы, раздел 1). */
+val MOSCOW: ZoneId = ZoneId.of("Europe/Moscow")
+
+/**
+ * Производственный календарь, заданный исключениями (таблица calendar_day):
+ * день рабочий, если он есть в исключениях с is_working = true,
+ * или если его там нет и это понедельник–пятница.
+ */
+class WorkCalendar(private val exceptions: Map<LocalDate, Boolean>) {
+    fun isWorkingDay(day: LocalDate): Boolean =
+        exceptions[day] ?: (day.dayOfWeek != DayOfWeek.SATURDAY && day.dayOfWeek != DayOfWeek.SUNDAY)
+}
+
+/** Признак срока (проект, раздел 4). */
+enum class SlaState { IN_TIME, AT_RISK, OVERDUE }
+
+/** Какой срок сейчас действует у заявки. */
+enum class SlaStage { REACTION, RESOLUTION }
+
+/**
+ * Состояние срока заявки для экрана: этап, срок, остаток в минутах режима и признак.
+ * Для заявки с выполненными работами remaining = null, а признак показывает,
+ * уложились ли в срок устранения.
+ */
+data class SlaIndicator(val stage: SlaStage, val due: Instant, val remaining: Duration?, val state: SlaState)
+
+/**
+ * Расчётный модуль: сроки реакции и устранения по уровню SLA и календарю, остаток времени
+ * и признак срока. Алгоритм — проект системы, раздел 8 (блок-схема на рис. 13).
+ */
+class SlaCalculator(private val calendar: WorkCalendar, private val zone: ZoneId = MOSCOW) {
+
+    /**
+     * Срок = начало отсчёта [start] + [minutes] минут в режиме [mode]
+     * (1 — круглосуточно, 2 — рабочее время пн–пт 9:00–18:00 по календарю).
+     */
+    fun due(start: Instant, minutes: Int, mode: Int): Instant {
+        require(minutes > 0) { "Время по уровню SLA должно быть больше нуля" }          // п. 1
+        if (mode == MODE_24X7) return start.plus(Duration.ofMinutes(minutes.toLong()))  // п. 2
+
+        var t = LocalDateTime.ofInstant(start, zone)                                    // п. 3
+        var rest = Duration.ofMinutes(minutes.toLong())
+        repeat(MAX_DAYS) {
+            t = toWorkingTime(t)                                                        // п. 4–5
+            val available = Duration.between(t, t.toLocalDate().atTime(WORK_END))       // п. 6
+            if (rest <= available) return t.plus(rest).atZone(zone).toInstant()         // п. 7
+            rest = rest.minus(available)                                                // п. 8
+            t = t.toLocalDate().plusDays(1).atTime(WORK_START)
+        }
+        error("Не найден рабочий день за $MAX_DAYS дней — проверьте календарь")
+    }
+
+    /**
+     * Остаток: время режима от [now] до [due]. Отрицательный, если срок прошёл
+     * (тогда по модулю — насколько просрочено).
+     */
+    fun remaining(now: Instant, due: Instant, mode: Int): Duration =
+        if (now <= due) between(now, due, mode) else between(due, now, mode).negated()
+
+    /** Признак: просрочена при остатке ≤ 0, под угрозой при остатке < 25 % длительности этапа. */
+    fun state(remaining: Duration, stageMinutes: Int): SlaState = when {
+        remaining <= Duration.ZERO -> SlaState.OVERDUE
+        remaining.multipliedBy(4) < Duration.ofMinutes(stageMinutes.toLong()) -> SlaState.AT_RISK
+        else -> SlaState.IN_TIME
+    }
+
+    /** Индикатор для заявки: до прибытия — по сроку реакции, после — по сроку устранения. */
+    fun indicator(
+        now: Instant, reactionDue: Instant, resolutionDue: Instant, arrivedAt: Instant?, completedAt: Instant?,
+        reactionMin: Int, resolutionMin: Int, mode: Int,
+    ): SlaIndicator = when {
+        completedAt != null -> SlaIndicator(
+            SlaStage.RESOLUTION, resolutionDue, null,
+            if (completedAt <= resolutionDue) SlaState.IN_TIME else SlaState.OVERDUE,
+        )
+        arrivedAt == null -> remaining(now, reactionDue, mode).let {
+            SlaIndicator(SlaStage.REACTION, reactionDue, it, state(it, reactionMin))
+        }
+        else -> remaining(now, resolutionDue, mode).let {
+            SlaIndicator(SlaStage.RESOLUTION, resolutionDue, it, state(it, resolutionMin))
+        }
+    }
+
+    /** Время режима между двумя моментами (from ≤ to): обход по дням с рабочими часами. */
+    private fun between(from: Instant, to: Instant, mode: Int): Duration {
+        if (mode == MODE_24X7) return Duration.between(from, to)
+        val start = LocalDateTime.ofInstant(from, zone)
+        val end = LocalDateTime.ofInstant(to, zone)
+        var total = Duration.ZERO
+        var day = start.toLocalDate()
+        while (!day.isAfter(end.toLocalDate())) {
+            if (calendar.isWorkingDay(day)) {
+                val a = maxOf(start, day.atTime(WORK_START))
+                val b = minOf(end, day.atTime(WORK_END))
+                if (a < b) total = total.plus(Duration.between(a, b))
+            }
+            day = day.plusDays(1)
+        }
+        return total
+    }
+
+    /** п. 4–5: сдвиг на ближайший рабочий момент. */
+    private fun toWorkingTime(value: LocalDateTime): LocalDateTime {
+        var t = value
+        while (!calendar.isWorkingDay(t.toLocalDate()) || !t.toLocalTime().isBefore(WORK_END)) {
+            t = t.toLocalDate().plusDays(1).atTime(WORK_START)
+        }
+        if (t.toLocalTime().isBefore(WORK_START)) t = t.toLocalDate().atTime(WORK_START)
+        return t
+    }
+
+    companion object {
+        const val MODE_24X7 = 1
+        const val MODE_WORK_HOURS = 2
+        val WORK_START: LocalTime = LocalTime.of(9, 0)
+        val WORK_END: LocalTime = LocalTime.of(18, 0)
+        private const val MAX_DAYS = 3660   // защита от бесконечного цикла при пустом календаре
+    }
+}
+
+
+Листинг 2 — WorkTimeCalculator.kt (расчёт трудозатрат по интервалам работы), операторов: 11
+
+/** Интервал работы (таблица work_log): вид 1 — дорога, 2 — работа на объекте. */
+data class WorkInterval(val kind: Int, val start: Instant, val end: Instant?)
+
+/**
+ * Трудозатраты по интервалам (проект системы, раздел 4):
+ * по заявке — Σ (coalesce(конец, сейчас) − начало);
+ * за период — Σ (min(конец, конец периода) − max(начало, начало периода)), если результат > 0.
+ */
+object WorkTimeCalculator {
+    const val KIND_ROAD = 1
+    const val KIND_WORK = 2
+
+    /** Сумма по всем интервалам; незакрытый интервал считается до [now]. [kind] = null — все виды. */
+    fun total(intervals: List<WorkInterval>, now: Instant, kind: Int? = null): Duration =
+        intervals.filter { kind == null || it.kind == kind }
+            .fold(Duration.ZERO) { sum, i -> sum.plus(positive(i.start, i.end ?: now)) }
+
+    /** Сумма за период [from, to) с обрезкой интервалов по его границам. */
+    fun inPeriod(intervals: List<WorkInterval>, from: Instant, to: Instant, now: Instant, kind: Int? = null): Duration =
+        intervals.filter { kind == null || it.kind == kind }
+            .fold(Duration.ZERO) { sum, i -> sum.plus(positive(maxOf(i.start, from), minOf(i.end ?: now, to))) }
+
+    /** Целые минуты — так трудозатраты попадают в акт (ОКЕИ 355). */
+    fun minutes(duration: Duration): Int = duration.toMinutes().toInt()
+
+    private fun positive(a: Instant, b: Instant): Duration =
+        if (b > a) Duration.between(a, b) else Duration.ZERO
+}
+
+
+Листинг 3 — RequestStatusMachine.kt (машина статусов заявки), операторов: 52
+
+/** Пункт чек-листа заявки с отметкой и числом фото — для проверок перед сменой статуса. */
+data class ChecklistCheck(
+    val itemId: Int,
+    val text: String,
+    val required: Boolean,
+    val needPhoto: Boolean,
+    val done: Boolean,
+    val photoCount: Int,
+)
+
+/** Что нужно записать в базу при переходе (применяет RequestRepository одной транзакцией). */
+data class TransitionChanges(
+    val newStatus: Int,
+    val at: Moment,
+    val setArrivedAt: Boolean = false,
+    val setCompletedAt: Boolean = false,
+    val setClosedAt: Boolean = false,
+    /** Закрыть все незакрытые интервалы моментом [at]. */
+    val closeOpenIntervals: Boolean = false,
+    /** Открыть новый интервал этого вида (1 — дорога, 2 — работа) или null. */
+    val openIntervalKind: Int? = null,
+)
+
+sealed interface TransitionResult {
+    data class Allowed(val changes: TransitionChanges) : TransitionResult
+    data class Denied(val reasons: List<String>) : TransitionResult
+}
+
+/**
+ * Статусы заявки и допустимые переходы для инженера (проект системы, раздел 3).
+ * 2 «Назначена» → 3 «В пути» → 4 «На объекте» → 5 «Работы выполнены» (или 8 «Приостановлена»).
+ * В 6 «Закрыта» заявку переводит подписание акта (И5), в 7 «Отменена» — диспетчер (И6).
+ */
+object RequestStatusMachine {
+    /** Куда инженер может перевести заявку из статуса [status] кнопками карточки. */
+    fun targetsFor(status: Int): List<Int> = when (status) {
+        RequestStatus.ASSIGNED -> listOf(RequestStatus.ON_THE_WAY)
+        RequestStatus.ON_THE_WAY -> listOf(RequestStatus.ON_SITE)
+        RequestStatus.ON_SITE -> listOf(RequestStatus.WORK_DONE, RequestStatus.SUSPENDED)
+        else -> emptyList()
+    }
+
+    /** Чек-лист и «Что сделано» меняются только на объекте. */
+    fun canEditWork(status: Int): Boolean = status == RequestStatus.ON_SITE
+
+    /** После подписи акта или отмены заявка и её записи не меняются. */
+    fun isLocked(status: Int): Boolean = status == RequestStatus.CLOSED || status == RequestStatus.CANCELLED
+
+    fun transition(
+        from: Int,
+        to: Int,
+        checklist: List<ChecklistCheck>,
+        resultText: String?,
+        now: Moment,
+    ): TransitionResult {
+        if (to !in targetsFor(from)) {
+            return TransitionResult.Denied(
+                listOf("Переход «${RequestStatus.title(from)}» → «${RequestStatus.title(to)}» недопустим"),
+            )
+        }
+        val reasons = when (to) {
+            RequestStatus.WORK_DONE -> checkWorkDone(checklist, resultText)
+            RequestStatus.SUSPENDED -> if (resultText.isNullOrBlank())
+                listOf("Заполните «Что сделано»: что выполнено и чего ждём") else emptyList()
+            else -> emptyList()
+        }
+        if (reasons.isNotEmpty()) return TransitionResult.Denied(reasons)
+
+        val changes = when (to) {
+            // «В пути» открывает интервал дороги
+            RequestStatus.ON_THE_WAY -> TransitionChanges(to, now, openIntervalKind = WorkTimeCalculator.KIND_ROAD)
+            // «На объекте» — факт реакции: закрывает дорогу, открывает работу
+            RequestStatus.ON_SITE -> TransitionChanges(to, now, setArrivedAt = true, closeOpenIntervals = true,
+                openIntervalKind = WorkTimeCalculator.KIND_WORK)
+            // «Работы выполнены» — факт устранения, закрывает всё
+            RequestStatus.WORK_DONE -> TransitionChanges(to, now, setCompletedAt = true, closeOpenIntervals = true)
+            else -> TransitionChanges(to, now, closeOpenIntervals = true)
+        }
+        return TransitionResult.Allowed(changes)
+    }
+
+    /**
+     * Закрытие заявки (5 → 6) — с экрана акта, когда акт готов: подписан на экране или
+     * сфотографирован бумажный подписанный акт (проект, раздел 3).
+     */
+    fun close(from: Int, actReady: Boolean, now: Moment): TransitionResult = when {
+        from != RequestStatus.WORK_DONE -> TransitionResult.Denied(
+            listOf("Закрыть можно только заявку в статусе «${RequestStatus.title(RequestStatus.WORK_DONE)}»"))
+        !actReady -> TransitionResult.Denied(
+            listOf("Сначала подпишите акт на экране или сфотографируйте подписанный бумажный акт"))
+        else -> TransitionResult.Allowed(TransitionChanges(RequestStatus.CLOSED, now, setClosedAt = true))
+    }
+
+    /** Проверки перед «Работы выполнены» (проект, раздел 3). */
+    fun checkWorkDone(checklist: List<ChecklistCheck>, resultText: String?): List<String> = buildList {
+        checklist.filter { it.required && !it.done }
+            .forEach { add("Не отмечен обязательный пункт: ${it.text}") }
+        checklist.filter { it.needPhoto && it.done && it.photoCount == 0 }
+            .forEach { add("Нужно фото к пункту: ${it.text}") }
+        if (resultText.isNullOrBlank()) add("Заполните «Что сделано»")
+    }
+}
+
+
+Листинг 4 — ActBuilder.kt (формирование акта выполненных работ), операторов: 80
+
+/** Всё, что нужно знать для акта по одной заявке. */
+data class ActInput(
+    val requestNumber: String,
+    val actDate: LocalDate,
+    val executorName: String,
+    val customerName: String,
+    val customerInn: String,
+    val contractNumber: String,
+    val siteAddress: String,
+    val workTypeCode: String,
+    val workTypeName: String,
+    val equipment: String?,
+    val resultText: String?,
+    /** Выполненные пункты чек-листа: текст и замечание. */
+    val doneItems: List<Pair<String, String?>>,
+    val intervals: List<WorkInterval>,
+    val completedAt: Instant?,
+    val engineerName: String,
+    val engineerPosition: String,
+    /** Способ подписания: 1 — на экране, 2 — на бумаге. */
+    val signMode: Int,
+    val signerName: String? = null,
+    val signerPosition: String? = null,
+    val hasSignature: Boolean = false,
+    val signedAt: Instant? = null,
+)
+
+/** Строка «реквизит — значение» в шапке акта. */
+data class ActField(val name: String, val value: String)
+
+/** Готовое к отрисовке содержание акта (рисует ActPdfWriter). */
+data class ActContent(
+    val title: String,
+    val number: String,
+    val date: LocalDate,
+    val fields: List<ActField>,
+    val resultText: String,
+    val doneItems: List<String>,
+    val workMin: Int,
+    val engineerLine: String,
+    val signerLine: String?,
+    val signMode: Int,
+)
+
+/**
+ * Акт выполненных работ: номер, трудозатраты и проверка обязательных реквизитов
+ * первичного документа по ч. 2 ст. 9 Федерального закона № 402-ФЗ (проект, раздел 2.1, таблица act).
+ */
+object ActBuilder {
+    const val SIGN_ON_SCREEN = 1
+    const val SIGN_ON_PAPER = 2
+
+    /** Номер акта производный от номера заявки: «З-2610-0137» → «А-2610-0137». */
+    fun actNumber(requestNumber: String): String = "А" + requestNumber.drop(1)
+
+    /**
+     * Трудозатраты на объекте в минутах: только интервалы работы, дорога в акт не входит.
+     * Незакрытые интервалы считаются до «Работы выполнены» (к этому моменту их закрыла машина статусов).
+     * Начатая минута считается целой: иначе работа короче минуты дала бы 0, а акт без величины
+     * подписать нельзя, и заявку уже не закрыть (после «Работы выполнены» время не идёт).
+     */
+    fun workMinutes(intervals: List<WorkInterval>, completedAt: Instant?): Int {
+        val end = completedAt ?: intervals.mapNotNull { it.end }.maxOrNull() ?: return 0
+        val total = WorkTimeCalculator.total(intervals, end, WorkTimeCalculator.KIND_WORK)
+        val whole = WorkTimeCalculator.minutes(total)
+        return if (total > java.time.Duration.ofMinutes(whole.toLong())) whole + 1 else whole
+    }
+
+    /**
+     * Акт готов к закрытию заявки (проект, раздел 3): подписан на экране — есть изображение
+     * подписи и время подписи; подписан на бумаге — к заявке приложено фото подписанного экземпляра.
+     */
+    fun isReady(signMode: Int, hasSignatureFile: Boolean, signedAt: Instant?, paperPhotos: Int): Boolean =
+        when (signMode) {
+            SIGN_ON_SCREEN -> hasSignatureFile && signedAt != null
+            SIGN_ON_PAPER -> paperPhotos > 0
+            else -> false
+        }
+
+    /** Каких реквизитов не хватает. Пустой список — акт можно подписывать. */
+    fun missingRequisites(input: ActInput): List<String> = buildList {
+        if (input.requestNumber.isBlank()) add("номер документа")
+        if (input.executorName.isBlank()) add("наименование исполнителя")
+        if (input.customerName.isBlank()) add("наименование заказчика")
+        if (input.workTypeName.isBlank() || input.resultText.isNullOrBlank()) add("содержание факта — что сделано")
+        if (workMinutes(input.intervals, input.completedAt) <= 0) add("величина — трудозатраты на объекте")
+        if (input.engineerName.isBlank() || input.engineerPosition.isBlank()) add("должность и ФИО инженера")
+        if (input.signMode == SIGN_ON_SCREEN) {
+            if (input.signerName.isNullOrBlank()) add("ФИО представителя заказчика")
+            if (input.signerPosition.isNullOrBlank()) add("должность представителя заказчика")
+            if (!input.hasSignature) add("подпись представителя заказчика")
+        }
+    }
+
+    fun build(input: ActInput): ActContent {
+        val number = actNumber(input.requestNumber)
+        val fields = buildList {
+            add(ActField("Исполнитель", input.executorName))
+            add(ActField("Заказчик", "${input.customerName}, ИНН ${input.customerInn}"))
+            add(ActField("Договор", "№ ${input.contractNumber}"))
+            add(ActField("Объект", input.siteAddress))
+            add(ActField("Заявка", "№ ${input.requestNumber}"))
+            add(ActField("Вид работ", "${input.workTypeCode} · ${input.workTypeName}"))
+            input.equipment?.let { add(ActField("Оборудование", it)) }
+        }
+        return ActContent(
+            title = "Акт выполненных работ",
+            number = number,
+            date = input.actDate,
+            fields = fields,
+            resultText = input.resultText.orEmpty(),
+            doneItems = input.doneItems.map { (text, comment) -> if (comment.isNullOrBlank()) text else "$text ($comment)" },
+            workMin = workMinutes(input.intervals, input.completedAt),
+            engineerLine = "${input.engineerPosition} ${input.engineerName}",
+            signerLine = if (input.signerName.isNullOrBlank()) null
+                else "${input.signerPosition.orEmpty()} ${input.signerName}".trim(),
+            signMode = input.signMode,
+        )
+    }
+}
+
+
+Листинг 5 — BarcodeAnalyzer.kt (разбор кода оборудования), операторов: 32
+
+/** Единица оборудования объекта — то, с чем сверяется отсканированный код. */
+data class EquipmentRef(val id: Int, val invCode: String, val serialNo: String?, val title: String)
+
+enum class CodeKind {
+    /** Метка компании «BK-EQ-000123» (QR-код, наклеивает сервисная служба). */
+    COMPANY_LABEL,
+    /** Заводской серийный номер производителя (Code 128, Data Matrix и т. п.). */
+    SERIAL,
+}
+
+data class ParsedCode(val value: String, val kind: CodeKind)
+
+sealed interface ScanMatch {
+    val code: ParsedCode
+
+    /** Найдено на объекте. [isRequestEquipment] — это та самая единица, что указана в заявке. */
+    data class Found(override val code: ParsedCode, val equipment: EquipmentRef, val isRequestEquipment: Boolean) : ScanMatch
+
+    /** На объекте такого нет — код всё равно сохраняется в заявке (scanned_code), работа продолжается. */
+    data class NotFound(override val code: ParsedCode) : ScanMatch
+}
+
+/**
+ * Разбор отсканированного или введённого вручную кода и поиск оборудования среди
+ * единиц объекта заявки (проект системы, разделы 3 и 7).
+ */
+object BarcodeAnalyzer {
+    private val COMPANY_LABEL = Regex("^BK-EQ-\\d{6}$")
+    const val MAX_LENGTH = 100   // длина поля request.scanned_code
+
+    /** null — пустой код. Пробелы по краям убираются, метка компании приводится к верхнему регистру. */
+    fun parse(raw: String): ParsedCode? {
+        val text = raw.trim().take(MAX_LENGTH)
+        if (text.isEmpty()) return null
+        val upper = text.uppercase()
+        return if (COMPANY_LABEL.matches(upper)) ParsedCode(upper, CodeKind.COMPANY_LABEL)
+        else ParsedCode(text, CodeKind.SERIAL)
+    }
+
+    fun match(code: ParsedCode, siteEquipment: List<EquipmentRef>, requestEquipmentId: Int?): ScanMatch {
+        val found = when (code.kind) {
+            CodeKind.COMPANY_LABEL -> siteEquipment.firstOrNull { it.invCode == code.value }
+            CodeKind.SERIAL -> siteEquipment.firstOrNull { it.serialNo?.trim().equals(code.value, ignoreCase = true) }
+        }
+        return if (found == null) ScanMatch.NotFound(code)
+        else ScanMatch.Found(code, found, isRequestEquipment = found.id == requestEquipmentId)
+    }
+}
+
+
+Листинг 6 — SlaService.cs (расчёт сроков по SLA на сервере), операторов: 73
+
+/// <summary>Признак срока (проект, раздел 4).</summary>
+public enum SlaState { InTime, AtRisk, Overdue }
+
+/// <summary>Какой срок сейчас действует у заявки.</summary>
+public enum SlaStage { Reaction, Resolution }
+
+/// <summary>
+/// Состояние срока заявки: этап, срок, остаток в минутах режима и признак.
+/// Для заявки с выполненными работами Remaining = null, а признак показывает,
+/// уложились ли в срок устранения.
+/// </summary>
+public record SlaIndicator(SlaStage Stage, DateTimeOffset Due, TimeSpan? Remaining, SlaState State);
+
+/// <summary>
+/// Производственный календарь, заданный исключениями (таблица calendar_day):
+/// день рабочий, если он есть в исключениях с is_working = true,
+/// или если его там нет и это понедельник–пятница.
+/// </summary>
+public class WorkCalendar(IReadOnlyDictionary<DateOnly, bool> exceptions)
+{
+    public static readonly WorkCalendar Empty = new(new Dictionary<DateOnly, bool>());
+
+    public bool IsWorkingDay(DateOnly day) =>
+        exceptions.TryGetValue(day, out var isWorking)
+            ? isWorking
+            : day.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday);
+}
+
+/// <summary>
+/// Расчётный модуль сроков SLA — тот же алгоритм, что SlaCalculator в приложении
+/// (проект системы, раздел 8). Работает без базы данных: календарь передаётся готовым набором
+/// дат-исключений, поэтому модуль проверяется тестами на тех же примерах, что и в приложении.
+/// Все расчёты — по московскому времени.
+/// </summary>
+public class SlaService(WorkCalendar calendar)
+{
+    public const int Mode24x7 = 1;
+    public const int ModeWorkHours = 2;
+    public static readonly TimeOnly WorkStart = new(9, 0);
+    public static readonly TimeOnly WorkEnd = new(18, 0);
+    private const int MaxDays = 3660; // защита от бесконечного цикла при ошибочном календаре
+
+    /// <summary>Зона Europe/Moscow (в .NET 8 IANA-имя работает и на Windows).</summary>
+    public static readonly TimeZoneInfo Moscow = TimeZoneInfo.FindSystemTimeZoneById("Europe/Moscow");
+
+    /// <summary>
+    /// Срок = начало отсчёта <paramref name="start"/> + <paramref name="minutes"/> минут в режиме
+    /// <paramref name="mode"/> (1 — круглосуточно, 2 — рабочее время пн–пт 9:00–18:00 по календарю).
+    /// </summary>
+    public DateTimeOffset Due(DateTimeOffset start, int minutes, int mode)
+    {
+        if (minutes <= 0)                                                               // п. 1
+            throw new ArgumentException("Время по уровню SLA должно быть больше нуля", nameof(minutes));
+        if (mode == Mode24x7) return ToMoscow(start.AddMinutes(minutes));               // п. 2
+
+        var t = ToMoscow(start).DateTime;                                               // п. 3
+        var rest = TimeSpan.FromMinutes(minutes);
+        for (var i = 0; i < MaxDays; i++)
+        {
+            t = ToWorkingTime(t);                                                       // п. 4–5
+            var available = t.Date.Add(WorkEnd.ToTimeSpan()) - t;                       // п. 6
+            if (rest <= available) return FromMoscow(t + rest);                         // п. 7
+            rest -= available;                                                          // п. 8
+            t = t.Date.AddDays(1).Add(WorkStart.ToTimeSpan());
+        }
+        throw new InvalidOperationException($"Не найден рабочий день за {MaxDays} дней — проверьте календарь");
+    }
+
+    /// <summary>
+    /// Остаток: время режима от <paramref name="now"/> до <paramref name="due"/>.
+    /// Отрицательный, если срок прошёл (по модулю — насколько просрочено).
+    /// </summary>
+    public TimeSpan Remaining(DateTimeOffset now, DateTimeOffset due, int mode) =>
+        now <= due ? Between(now, due, mode) : -Between(due, now, mode);
+
+    /// <summary>Признак: просрочена при остатке ≤ 0, под угрозой при остатке &lt; 25 % длительности этапа.</summary>
+    public static SlaState State(TimeSpan remaining, int stageMinutes)
+    {
+        if (remaining <= TimeSpan.Zero) return SlaState.Overdue;
+        if (remaining * 4 < TimeSpan.FromMinutes(stageMinutes)) return SlaState.AtRisk;
+        return SlaState.InTime;
+    }
+
+    /// <summary>Индикатор заявки: до прибытия — по сроку реакции, после — по сроку устранения.</summary>
+    public SlaIndicator Indicator(
+        DateTimeOffset now, DateTimeOffset reactionDue, DateTimeOffset resolutionDue,
+        DateTimeOffset? arrivedAt, DateTimeOffset? completedAt,
+        int reactionMin, int resolutionMin, int mode)
+    {
+        if (completedAt != null)
+        {
+            var state = completedAt <= resolutionDue ? SlaState.InTime : SlaState.Overdue;
+            return new SlaIndicator(SlaStage.Resolution, resolutionDue, null, state);
+        }
+        if (arrivedAt == null)
+        {
+            var r = Remaining(now, reactionDue, mode);
+            return new SlaIndicator(SlaStage.Reaction, reactionDue, r, State(r, reactionMin));
+        }
+        var rest = Remaining(now, resolutionDue, mode);
+        return new SlaIndicator(SlaStage.Resolution, resolutionDue, rest, State(rest, resolutionMin));
+    }
+
+    /// <summary>Время режима между двумя моментами (from ≤ to): обход по дням с рабочими часами.</summary>
+    private TimeSpan Between(DateTimeOffset from, DateTimeOffset to, int mode)
+    {
+        if (mode == Mode24x7) return to - from;
+        var start = ToMoscow(from).DateTime;
+        var end = ToMoscow(to).DateTime;
+        var total = TimeSpan.Zero;
+        for (var day = start.Date; day <= end.Date; day = day.AddDays(1))
+        {
+            if (!calendar.IsWorkingDay(DateOnly.FromDateTime(day))) continue;
+            var a = Max(start, day.Add(WorkStart.ToTimeSpan()));
+            var b = Min(end, day.Add(WorkEnd.ToTimeSpan()));
+            if (a < b) total += b - a;
+        }
+        return total;
+    }
+
+    /// <summary>п. 4–5: сдвиг на ближайший рабочий момент.</summary>
+    private DateTime ToWorkingTime(DateTime value)
+    {
+        var t = value;
+        while (!calendar.IsWorkingDay(DateOnly.FromDateTime(t)) || TimeOnly.FromDateTime(t) >= WorkEnd)
+            t = t.Date.AddDays(1).Add(WorkStart.ToTimeSpan());
+        if (TimeOnly.FromDateTime(t) < WorkStart) t = t.Date.Add(WorkStart.ToTimeSpan());
+        return t;
+    }
+
+    /// <summary>Момент времени в записи по московскому времени (со смещением +03:00).</summary>
+    public static DateTimeOffset ToMoscow(DateTimeOffset value) => TimeZoneInfo.ConvertTime(value, Moscow);
+
+    /// <summary>Московское «настенное» время → момент со смещением.</summary>
+    private static DateTimeOffset FromMoscow(DateTime local) =>
+        new(DateTime.SpecifyKind(local, DateTimeKind.Unspecified), Moscow.GetUtcOffset(local));
+
+    private static DateTime Max(DateTime a, DateTime b) => a > b ? a : b;
+    private static DateTime Min(DateTime a, DateTime b) => a < b ? a : b;
+}
+
+
+Листинг 7 — PeriodStats.kt (показатели за период), операторов: 24
+
+/** Период [from, to) — сутки или месяц по московскому времени. */
+data class Period(val from: Instant, val to: Instant)
+
+/** Закрытая заявка для расчёта доли в срок. */
+data class ClosedRequest(
+    val closedAt: Instant,
+    val arrivedAt: Instant?,
+    val completedAt: Instant?,
+    val reactionDue: Instant,
+    val resolutionDue: Instant,
+)
+
+data class InTimeShare(val closed: Int, val resolvedPercent: Int?, val reactedPercent: Int?)
+
+/**
+ * Показатели за период (проект, раздел 4). Заявки периода — закрытые (статус 6)
+ * с closed_at внутри периода; отменённые и приостановленные не учитываются.
+ */
+object PeriodStats {
+    fun day(now: Instant, zone: ZoneId = MOSCOW): Period {
+        val date = now.atZone(zone).toLocalDate()
+        return Period(date.atStartOfDay(zone).toInstant(), date.plusDays(1).atStartOfDay(zone).toInstant())
+    }
+
+    fun month(now: Instant, zone: ZoneId = MOSCOW): Period {
+        val m = YearMonth.from(now.atZone(zone))
+        return Period(m.atDay(1).atStartOfDay(zone).toInstant(), m.plusMonths(1).atDay(1).atStartOfDay(zone).toInstant())
+    }
+
+    fun inTimeShare(requests: List<ClosedRequest>, period: Period): InTimeShare {
+        val closed = requests.filter { it.closedAt >= period.from && it.closedAt < period.to }
+        return InTimeShare(
+            closed = closed.size,
+            resolvedPercent = percent(closed.count { it.completedAt != null && it.completedAt <= it.resolutionDue }, closed.size),
+            reactedPercent = percent(closed.count { it.arrivedAt != null && it.arrivedAt <= it.reactionDue }, closed.size),
+        )
+    }
+
+    /** Процент с округлением до целого; при пустом периоде — null («нет данных»). */
+    fun percent(part: Int, total: Int): Int? = if (total == 0) null else (part * 100.0 / total).roundToInt()
+}
+
+
+Листинг 8 — TrustedClock.kt (доверенное время фактов реакции и устранения), операторов: 26
+
+/** Момент времени и признак: получен ли он по доверенным часам (поле time_trusted). */
+data class Moment(val time: Instant, val trusted: Boolean)
+
+/** Источники времени устройства; в тестах подменяются. */
+interface TimeSource {
+    /** Часы устройства — пользователь может их перевести. */
+    fun wallClock(): Instant
+    /** Монотонные часы с момента загрузки (SystemClock.elapsedRealtime), от настроек не зависят. */
+    fun elapsedRealtimeMs(): Long
+    /** Номер загрузки устройства: после перезагрузки монотонные часы начинаются заново. */
+    fun bootCount(): Int
+}
+
+/** Опорная пара «время сервера — монотонные часы», запомненная при синхронизации. */
+data class TimeReference(val serverTime: Instant, val elapsedMs: Long, val bootCount: Int)
+
+interface TimeReferenceStore {
+    fun load(): TimeReference?
+    fun save(reference: TimeReference)
+    fun clear()
+}
+
+/**
+ * Доверенное время (проект системы, раздел 1). Если есть опорная пара с последней
+ * синхронизации и телефон с тех пор не перезагружался, время = время сервера + прошедшие
+ * монотонные миллисекунды. Иначе берутся часы устройства с пометкой trusted = false.
+ * Опорную пару задаёт каждый ответ сервера со временем (вход, обновление токена, pull, push).
+ */
+class TrustedClock(private val source: TimeSource, private val store: TimeReferenceStore) {
+
+    fun now(): Moment {
+        val ref = store.load()
+        val elapsed = source.elapsedRealtimeMs()
+        if (ref != null && ref.bootCount == source.bootCount() && elapsed >= ref.elapsedMs) {
+            return Moment(ref.serverTime.plusMillis(elapsed - ref.elapsedMs), trusted = true)
+        }
+        return Moment(source.wallClock(), trusted = false)
+    }
+
+    /** Вызывается при синхронизации: сервер сообщил своё текущее время. */
+    fun onServerTime(serverTime: Instant) {
+        store.save(TimeReference(serverTime, source.elapsedRealtimeMs(), source.bootCount()))
+    }
+
+    /** Забыть опорную пару — при выходе из приложения. */
+    fun reset() = store.clear()
+}
+
+
+Листинг 9 — AppLockTimer.kt (таймер блокировки приложения), операторов: 31
+
+/** Момент последнего действия: монотонные часы и номер загрузки (после перезагрузки часы идут с нуля). */
+data class ActivityMark(val elapsedMs: Long, val bootCount: Int)
+
+/**
+ * Таймер блокировки приложения (функция 1.2, экран Э0): после [timeoutMs] без действий
+ * пользователя приложение блокируется. Время берётся из монотонных часов, поэтому перевод
+ * часов телефона на блокировку не влияет. Класс не зависит от Android — проверяется тестами.
+ *
+ * [saved] — момент последнего действия, сохранённый прошлым процессом (система могла выгрузить
+ * приложение, пока оно было свёрнуто). Если его нет, телефон перезагружался или прошло
+ * [timeoutMs] и больше, приложение запускается заблокированным.
+ */
+class AppLockTimer(
+    private val source: TimeSource,
+    saved: ActivityMark? = null,
+    private val timeoutMs: Long = TIMEOUT_MS,
+) {
+    private var lastActivity: Long = source.elapsedRealtimeMs()
+
+    var isLocked: Boolean = !restore(saved)
+        private set
+
+    /** Касание экрана: отсчёт заново. Пока приложение заблокировано, касания не считаются. */
+    fun onUserActivity() {
+        if (!isLocked) lastActivity = source.elapsedRealtimeMs()
+    }
+
+    /** Не пора ли заблокировать. Вызывается по таймеру и при возврате приложения из фона. */
+    fun check(): Boolean {
+        if (!isLocked && source.elapsedRealtimeMs() - lastActivity >= timeoutMs) isLocked = true
+        return isLocked
+    }
+
+    /** Сколько осталось до блокировки — через столько проверить снова. */
+    fun millisUntilLock(): Long =
+        if (isLocked) 0 else (timeoutMs - (source.elapsedRealtimeMs() - lastActivity)).coerceAtLeast(0)
+
+    /** Разблокировали (PIN, отпечаток) или вошли по паролю — отсчёт с нуля. */
+    fun unlock() {
+        isLocked = false
+        lastActivity = source.elapsedRealtimeMs()
+    }
+
+    /** Что сохранить при уходе в фон, чтобы новый процесс продолжил отсчёт. */
+    fun mark() = ActivityMark(lastActivity, source.bootCount())
+
+    private fun restore(saved: ActivityMark?): Boolean {
+        if (saved == null || saved.bootCount != source.bootCount()) return false
+        val idle = source.elapsedRealtimeMs() - saved.elapsedMs
+        if (idle !in 0 until timeoutMs) return false
+        lastActivity = saved.elapsedMs
+        return true
+    }
+
+    companion object {
+        /** 5 минут без действий — проект системы, функция 1.2. */
+        const val TIMEOUT_MS = 5 * 60 * 1000L
+    }
+}

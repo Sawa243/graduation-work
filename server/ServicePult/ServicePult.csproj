@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ServicePult</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.31" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.31" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.31">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <!-- Relational указан явно: Npgsql 8.0.11 ссылается на 8.0.11, а остальной EF Core — 8.0.31 -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.31" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+  </ItemGroup>
+
+  <!-- тестовые данные копируются рядом со сборкой -->
+  <ItemGroup>
+    <None Update="SeedData\seed.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- образец настроек для разработчика (без пароля и ключа) в сборку и публикацию не попадает -->
+  <ItemGroup>
+    <Content Update="appsettings.Development.example.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
+  <!-- интеграционные тесты видят internal-классы (например, Program) -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="ServicePult.Tests" />
+  </ItemGroup>
+
+</Project>

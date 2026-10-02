@@ -1,0 +1,27 @@
+# Gradle и Android Studio
+.gradle/
+build/
+.idea/
+*.iml
+local.properties
+captures/
+.kotlin/
+*.apk
+*.aab
+
+# .NET
+bin/
+obj/
+*.user
+
+# секреты
+*.jks
+*.keystore
+appsettings.Development.json
+.env
+
+# Python
+__pycache__/
+
+# локальные пароли разработки (PostgreSQL)
+.local/

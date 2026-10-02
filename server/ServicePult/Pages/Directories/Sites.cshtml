@@ -1,0 +1,25 @@
+@page
+@model ServicePult.Pages.Directories.SitesModel
+@{
+    ViewData["Title"] = "Объекты";
+}
+<partial name="_Nav" />
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr><th>Код</th><th>Заказчик</th><th>Адрес</th><th>Контактное лицо</th><th>Телефон</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model.Items)
+            {
+                <tr>
+                    <td class="nowrap">@s.Code</td>
+                    <td>@s.Customer!.Name</td>
+                    <td>@s.Address</td>
+                    <td>@(s.ContactName ?? "—")</td>
+                    <td class="nowrap">@(s.ContactPhone ?? "—")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

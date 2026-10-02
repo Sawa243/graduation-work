@@ -1,0 +1,26 @@
+@page
+@model ServicePult.Pages.Directories.EquipmentModel
+@{
+    ViewData["Title"] = "Оборудование";
+}
+<partial name="_Nav" />
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr><th>Метка</th><th>Объект</th><th>Производитель</th><th>Модель</th><th>Заводской номер</th><th>Гарантия до</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model.Items)
+            {
+                <tr>
+                    <td class="nowrap">@e.InvCode</td>
+                    <td><span class="nowrap">@e.Site!.Code</span> <span class="muted small">@e.Site.Address</span></td>
+                    <td>@e.Vendor</td>
+                    <td>@e.Model</td>
+                    <td class="nowrap">@(e.SerialNo ?? "—")</td>
+                    <td class="nowrap">@Format.Date(e.WarrantyTo)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,11 @@
+@{
+    var path = Context.Request.Path.Value ?? "";
+    string Css(string page) => path.EndsWith(page, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+<h1>Справочники</h1>
+<nav class="subnav">
+    <a class="@Css("/Customers")" href="/Directories/Customers">Заказчики</a>
+    <a class="@Css("/Sites")" href="/Directories/Sites">Объекты</a>
+    <a class="@Css("/Equipment")" href="/Directories/Equipment">Оборудование</a>
+    <a class="@Css("/Calendar")" href="/Directories/Calendar">Календарь</a>
+</nav>

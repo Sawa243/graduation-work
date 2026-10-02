@@ -1,0 +1,1034 @@
+{
+ "generated_for_base": "2026-09-25",
+ "customer": [
+  {
+   "id": 1,
+   "code": "0001",
+   "name": "АО «Энергосеть-Север»",
+   "inn": "7700000011"
+  },
+  {
+   "id": 2,
+   "code": "0002",
+   "name": "ООО «Технопарк „Пример“»",
+   "inn": "7700000022"
+  },
+  {
+   "id": 3,
+   "code": "0003",
+   "name": "ГБУ «Тестовый центр учёта»",
+   "inn": "7700000033"
+  }
+ ],
+ "contract": [
+  {
+   "id": 1,
+   "number": "СО-2026-014",
+   "customer_id": 1,
+   "date_from": "2026-01-15",
+   "date_to": "2026-12-31",
+   "max_sla": 1,
+   "e_sign_allowed": true
+  },
+  {
+   "id": 2,
+   "number": "СО-2026-021",
+   "customer_id": 2,
+   "date_from": "2026-03-01",
+   "date_to": null,
+   "max_sla": 2,
+   "e_sign_allowed": true
+  },
+  {
+   "id": 3,
+   "number": "СО-2025-087",
+   "customer_id": 3,
+   "date_from": "2025-09-01",
+   "date_to": "2027-08-31",
+   "max_sla": 3,
+   "e_sign_allowed": false
+  }
+ ],
+ "sla_level": [
+  {
+   "id": 1,
+   "code": "SLA-1",
+   "name": "Критичный",
+   "reaction_min": 120,
+   "resolution_min": 480,
+   "mode": 1
+  },
+  {
+   "id": 2,
+   "code": "SLA-2",
+   "name": "Стандартный",
+   "reaction_min": 240,
+   "resolution_min": 1440,
+   "mode": 2
+  },
+  {
+   "id": 3,
+   "code": "SLA-3",
+   "name": "Плановый",
+   "reaction_min": 1080,
+   "resolution_min": 2700,
+   "mode": 2
+  }
+ ],
+ "site": [
+  {
+   "id": 1,
+   "code": "0001-01",
+   "customer_id": 1,
+   "address": "г. Москва, Тестовый пр-д, д. 5, стр. 2",
+   "contact_name": "Петров Пётр Тестович",
+   "contact_phone": "+7 000 000-00-01"
+  },
+  {
+   "id": 2,
+   "code": "0001-02",
+   "customer_id": 1,
+   "address": "Московская обл., г. Условный, ул. Опытная, д. 14",
+   "contact_name": "Семёнова Ольга Примеровна",
+   "contact_phone": "+7 000 000-00-02"
+  },
+  {
+   "id": 3,
+   "code": "0002-01",
+   "customer_id": 2,
+   "address": "г. Москва, ул. Демонстрационная, д. 21",
+   "contact_name": "Кузнецов Андрей Тестович",
+   "contact_phone": "+7 000 000-00-03"
+  },
+  {
+   "id": 4,
+   "code": "0002-02",
+   "customer_id": 2,
+   "address": "г. Москва, Проектный б-р, д. 8, корп. 1",
+   "contact_name": "Лебедева Мария Условная",
+   "contact_phone": "+7 000 000-00-04"
+  },
+  {
+   "id": 5,
+   "code": "0003-01",
+   "customer_id": 3,
+   "address": "г. Москва, пер. Макетный, д. 3",
+   "contact_name": "Орлов Игорь Примерович",
+   "contact_phone": "+7 000 000-00-05"
+  }
+ ],
+ "equipment": [
+  {
+   "id": 1,
+   "inv_code": "BK-EQ-000101",
+   "site_id": 1,
+   "vendor": "Eltex",
+   "model": "MES2324",
+   "serial_no": "TST0000A0101",
+   "warranty_to": "2027-06-30"
+  },
+  {
+   "id": 2,
+   "inv_code": "BK-EQ-000102",
+   "site_id": 1,
+   "vendor": "Ippon",
+   "model": "Innova RT 3000",
+   "serial_no": "TST0000B0102",
+   "warranty_to": null
+  },
+  {
+   "id": 3,
+   "inv_code": "BK-EQ-000117",
+   "site_id": 2,
+   "vendor": "Aquarius",
+   "model": "T50 D213",
+   "serial_no": "TST0000C0117",
+   "warranty_to": "2026-12-31"
+  },
+  {
+   "id": 4,
+   "inv_code": "BK-EQ-000123",
+   "site_id": 4,
+   "vendor": "Eltex",
+   "model": "MES2428",
+   "serial_no": "TST0000D0123",
+   "warranty_to": "2027-03-31"
+  },
+  {
+   "id": 5,
+   "inv_code": "BK-EQ-000124",
+   "site_id": 4,
+   "vendor": "Eltex",
+   "model": "ESR-20",
+   "serial_no": "TST0000E0124",
+   "warranty_to": "2027-03-31"
+  },
+  {
+   "id": 6,
+   "inv_code": "BK-EQ-000131",
+   "site_id": 3,
+   "vendor": "Aquarius",
+   "model": "Pro T50 S44",
+   "serial_no": "TST0000F0131",
+   "warranty_to": null
+  },
+  {
+   "id": 7,
+   "inv_code": "BK-EQ-000140",
+   "site_id": 5,
+   "vendor": "Ippon",
+   "model": "Smart Winner II 1500",
+   "serial_no": "TST0000G0140",
+   "warranty_to": "2026-11-30"
+  },
+  {
+   "id": 8,
+   "inv_code": "BK-EQ-000141",
+   "site_id": 5,
+   "vendor": "Yealink",
+   "model": "MeetingBar A20",
+   "serial_no": "TST0000H0141",
+   "warranty_to": "2027-09-30"
+  }
+ ],
+ "work_type": [
+  {
+   "id": 1,
+   "code": "101",
+   "name": "Настройка межсетевого экрана",
+   "norm_min": 120
+  },
+  {
+   "id": 2,
+   "code": "201",
+   "name": "Диагностика сервера",
+   "norm_min": 90
+  },
+  {
+   "id": 3,
+   "code": "302",
+   "name": "Замена коммутатора доступа",
+   "norm_min": 120
+  },
+  {
+   "id": 4,
+   "code": "305",
+   "name": "Диагностика линии связи",
+   "norm_min": 60
+  },
+  {
+   "id": 5,
+   "code": "401",
+   "name": "Плановое ТО источника бесперебойного питания",
+   "norm_min": 90
+  },
+  {
+   "id": 6,
+   "code": "501",
+   "name": "Настройка системы видеоконференцсвязи",
+   "norm_min": 90
+  }
+ ],
+ "checklist_item": [
+  {
+   "id": 1,
+   "work_type_id": 1,
+   "pos": 1,
+   "text": "Сохранить текущую конфигурацию",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 2,
+   "work_type_id": 1,
+   "pos": 2,
+   "text": "Применить правила по заявке",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 3,
+   "work_type_id": 1,
+   "pos": 3,
+   "text": "Проверить доступность сервисов заказчика",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 4,
+   "work_type_id": 1,
+   "pos": 4,
+   "text": "Сфотографировать индикацию устройства",
+   "required": false,
+   "need_photo": true
+  },
+  {
+   "id": 5,
+   "work_type_id": 2,
+   "pos": 1,
+   "text": "Проверить журналы событий и индикацию",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 6,
+   "work_type_id": 2,
+   "pos": 2,
+   "text": "Проверить состояние дисков и блоков питания",
+   "required": true,
+   "need_photo": true
+  },
+  {
+   "id": 7,
+   "work_type_id": 2,
+   "pos": 3,
+   "text": "Записать результаты диагностики",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 8,
+   "work_type_id": 3,
+   "pos": 1,
+   "text": "Сохранить конфигурацию старого коммутатора",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 9,
+   "work_type_id": 3,
+   "pos": 2,
+   "text": "Установить новый коммутатор в стойку",
+   "required": true,
+   "need_photo": true
+  },
+  {
+   "id": 10,
+   "work_type_id": 3,
+   "pos": 3,
+   "text": "Перенести коммутацию по схеме портов",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 11,
+   "work_type_id": 3,
+   "pos": 4,
+   "text": "Проверить индикацию портов",
+   "required": true,
+   "need_photo": true
+  },
+  {
+   "id": 12,
+   "work_type_id": 3,
+   "pos": 5,
+   "text": "Наклеить QR-метку на новое устройство",
+   "required": false,
+   "need_photo": false
+  },
+  {
+   "id": 13,
+   "work_type_id": 4,
+   "pos": 1,
+   "text": "Проверить линию тестером",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 14,
+   "work_type_id": 4,
+   "pos": 2,
+   "text": "Проверить патч-корды и розетки",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 15,
+   "work_type_id": 4,
+   "pos": 3,
+   "text": "Сфотографировать место повреждения",
+   "required": false,
+   "need_photo": true
+  },
+  {
+   "id": 16,
+   "work_type_id": 5,
+   "pos": 1,
+   "text": "Внешний осмотр и очистка",
+   "required": true,
+   "need_photo": true
+  },
+  {
+   "id": 17,
+   "work_type_id": 5,
+   "pos": 2,
+   "text": "Проверить состояние батарей",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 18,
+   "work_type_id": 5,
+   "pos": 3,
+   "text": "Проверить переход на батареи",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 19,
+   "work_type_id": 5,
+   "pos": 4,
+   "text": "Записать показания в журнал",
+   "required": false,
+   "need_photo": false
+  },
+  {
+   "id": 20,
+   "work_type_id": 6,
+   "pos": 1,
+   "text": "Проверить подключение камеры и микрофонов",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 21,
+   "work_type_id": 6,
+   "pos": 2,
+   "text": "Провести тестовый сеанс связи",
+   "required": true,
+   "need_photo": false
+  },
+  {
+   "id": 22,
+   "work_type_id": 6,
+   "pos": 3,
+   "text": "Сфотографировать установленное оборудование",
+   "required": false,
+   "need_photo": true
+  }
+ ],
+ "employee": [
+  {
+   "id": 1,
+   "tab_no": "00042",
+   "full_name": "Тестов Иван Петрович",
+   "position": "Инженер выездной службы",
+   "role": 1,
+   "phone": "+7 000 000-10-42",
+   "login": "engineer",
+   "blocked": false,
+   "pass_hash": "pbkdf2-sha256$120000$aadcd0089b33ea7cff5adfe047d1b068$67a5e4d5429fe1e538610b0d7e3da833e9a4089b061d8c37d31fe8d99fad4704"
+  },
+  {
+   "id": 2,
+   "tab_no": "00017",
+   "full_name": "Примерова Анна Сергеевна",
+   "position": "Диспетчер сервисной службы",
+   "role": 2,
+   "phone": "+7 000 000-10-17",
+   "login": "dispatcher",
+   "blocked": false,
+   "pass_hash": "pbkdf2-sha256$120000$838a561166bb929186b10875f9734fe4$54c175cef3223ddd164421d94900af745951b045e552e3013261e02f0468423e"
+  },
+  {
+   "id": 3,
+   "tab_no": "00003",
+   "full_name": "Условный Олег Викторович",
+   "position": "Руководитель сервисной службы",
+   "role": 3,
+   "phone": "+7 000 000-10-03",
+   "login": "head",
+   "blocked": false,
+   "pass_hash": "pbkdf2-sha256$120000$fa5d643e59891482bb28b05c160fc792$59bc50ec3142cd7057392c41546e7dcf5bfa3b72c5aa39e8514c68d41316d8c5"
+  }
+ ],
+ "calendar_day": [
+  {
+   "day": "2026-01-01",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2026-01-02",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2026-01-05",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2026-01-06",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2026-01-07",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2026-01-08",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2026-01-09",
+   "is_working": false,
+   "note": "Перенос выходного дня"
+  },
+  {
+   "day": "2026-02-23",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2026-03-09",
+   "is_working": false,
+   "note": "Перенос праздника с выходного дня"
+  },
+  {
+   "day": "2026-05-01",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2026-05-11",
+   "is_working": false,
+   "note": "Перенос праздника с выходного дня"
+  },
+  {
+   "day": "2026-06-12",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2026-11-04",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2026-12-31",
+   "is_working": false,
+   "note": "Перенос выходного дня"
+  },
+  {
+   "day": "2027-01-01",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2027-01-04",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2027-01-05",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2027-01-06",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2027-01-07",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2027-01-08",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2027-02-20",
+   "is_working": true,
+   "note": "Рабочая суббота (перенос)"
+  },
+  {
+   "day": "2027-02-22",
+   "is_working": false,
+   "note": "Перенос выходного дня"
+  },
+  {
+   "day": "2027-02-23",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2027-03-08",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2027-05-03",
+   "is_working": false,
+   "note": "Перенос праздника с выходного дня"
+  },
+  {
+   "day": "2027-05-10",
+   "is_working": false,
+   "note": "Перенос праздника с выходного дня"
+  },
+  {
+   "day": "2027-06-14",
+   "is_working": false,
+   "note": "Перенос праздника с выходного дня"
+  },
+  {
+   "day": "2027-11-04",
+   "is_working": false,
+   "note": "Нерабочий праздничный день"
+  },
+  {
+   "day": "2027-11-05",
+   "is_working": false,
+   "note": "Перенос выходного дня"
+  },
+  {
+   "day": "2027-12-31",
+   "is_working": false,
+   "note": "Перенос выходного дня"
+  }
+ ],
+ "request": [
+  {
+   "id": 1,
+   "number": "З-2609-0132",
+   "contract_id": 3,
+   "site_id": 5,
+   "equipment_id": 7,
+   "work_type_id": 5,
+   "sla_level_id": 3,
+   "dispatcher_id": 2,
+   "engineer_id": 1,
+   "parent_id": null,
+   "description": "Плановое ТО ИБП в серверной, 3-й этаж.",
+   "registered_at": "2026-09-16T10:15:00+03:00",
+   "reaction_due": "2026-09-18T10:15:00+03:00",
+   "resolution_due": "2026-09-23T10:15:00+03:00",
+   "arrived_at": "2026-09-17T11:00:00+03:00",
+   "completed_at": "2026-09-17T13:10:00+03:00",
+   "closed_at": "2026-09-17T13:25:00+03:00",
+   "status": 6,
+   "scanned_code": null,
+   "result_text": "Проведено ТО, батареи в норме, время автономной работы 14 мин.",
+   "cancel_reason": null,
+   "time_trusted": true
+  },
+  {
+   "id": 2,
+   "number": "З-2609-0133",
+   "contract_id": 2,
+   "site_id": 3,
+   "equipment_id": 6,
+   "work_type_id": 2,
+   "sla_level_id": 2,
+   "dispatcher_id": 2,
+   "engineer_id": 1,
+   "parent_id": null,
+   "description": "Сервер учёта периодически перезагружается.",
+   "registered_at": "2026-09-17T09:40:00+03:00",
+   "reaction_due": "2026-09-17T13:40:00+03:00",
+   "resolution_due": "2026-09-21T15:40:00+03:00",
+   "arrived_at": "2026-09-17T12:05:00+03:00",
+   "completed_at": "2026-09-17T14:30:00+03:00",
+   "closed_at": "2026-09-17T14:40:00+03:00",
+   "status": 6,
+   "scanned_code": null,
+   "result_text": "Заменён блок питания из ЗИП заказчика, сервер работает стабильно.",
+   "cancel_reason": null,
+   "time_trusted": true
+  },
+  {
+   "id": 3,
+   "number": "З-2609-0134",
+   "contract_id": 1,
+   "site_id": 1,
+   "equipment_id": 1,
+   "work_type_id": 3,
+   "sla_level_id": 1,
+   "dispatcher_id": 2,
+   "engineer_id": 1,
+   "parent_id": null,
+   "description": "Нет связи на этаже, не работает коммутатор.",
+   "registered_at": "2026-09-17T15:00:00+03:00",
+   "reaction_due": "2026-09-17T17:00:00+03:00",
+   "resolution_due": "2026-09-17T23:00:00+03:00",
+   "arrived_at": null,
+   "completed_at": null,
+   "closed_at": null,
+   "status": 7,
+   "scanned_code": null,
+   "result_text": null,
+   "cancel_reason": "Заказчик восстановил питание коммутатора сам",
+   "time_trusted": true
+  },
+  {
+   "id": 4,
+   "number": "З-2609-0135",
+   "contract_id": 3,
+   "site_id": 5,
+   "equipment_id": 8,
+   "work_type_id": 6,
+   "sla_level_id": 3,
+   "dispatcher_id": 2,
+   "engineer_id": 1,
+   "parent_id": null,
+   "description": "Не работает камера в переговорной.",
+   "registered_at": "2026-09-21T11:20:00+03:00",
+   "reaction_due": "2026-09-23T11:20:00+03:00",
+   "resolution_due": "2026-09-28T11:20:00+03:00",
+   "arrived_at": "2026-09-22T10:00:00+03:00",
+   "completed_at": null,
+   "closed_at": null,
+   "status": 8,
+   "scanned_code": null,
+   "result_text": "Требуется замена камеры, ожидание поставки.",
+   "cancel_reason": null,
+   "time_trusted": true
+  },
+  {
+   "id": 5,
+   "number": "З-2609-0136",
+   "contract_id": 2,
+   "site_id": 3,
+   "equipment_id": null,
+   "work_type_id": 4,
+   "sla_level_id": 2,
+   "dispatcher_id": 2,
+   "engineer_id": 1,
+   "parent_id": null,
+   "description": "Пропадает сеть в бухгалтерии, 2 кабинета.",
+   "registered_at": "2026-09-24T14:10:00+03:00",
+   "reaction_due": "2026-09-25T09:10:00+03:00",
+   "resolution_due": "2026-09-29T11:10:00+03:00",
+   "arrived_at": "2026-09-25T09:40:00+03:00",
+   "completed_at": "2026-09-25T10:30:00+03:00",
+   "closed_at": null,
+   "status": 5,
+   "scanned_code": null,
+   "result_text": "Переобжат патч-корд, заменена розетка в каб. 204.",
+   "cancel_reason": null,
+   "time_trusted": true
+  },
+  {
+   "id": 6,
+   "number": "З-2609-0140",
+   "contract_id": 1,
+   "site_id": 2,
+   "equipment_id": 3,
+   "work_type_id": 1,
+   "sla_level_id": 1,
+   "dispatcher_id": 2,
+   "engineer_id": 1,
+   "parent_id": null,
+   "description": "После обновления межсетевого экрана недоступен сайт заказчика.",
+   "registered_at": "2026-09-28T07:40:00+03:00",
+   "reaction_due": "2026-09-28T09:40:00+03:00",
+   "resolution_due": "2026-09-28T15:40:00+03:00",
+   "arrived_at": "2026-09-28T08:35:00+03:00",
+   "completed_at": null,
+   "closed_at": null,
+   "status": 4,
+   "scanned_code": null,
+   "result_text": null,
+   "cancel_reason": null,
+   "time_trusted": true
+  },
+  {
+   "id": 7,
+   "number": "З-2609-0141",
+   "contract_id": 2,
+   "site_id": 3,
+   "equipment_id": null,
+   "work_type_id": 4,
+   "sla_level_id": 2,
+   "dispatcher_id": 2,
+   "engineer_id": 1,
+   "parent_id": null,
+   "description": "Медленная сеть в конференц-зале.",
+   "registered_at": "2026-09-28T08:10:00+03:00",
+   "reaction_due": "2026-09-28T13:00:00+03:00",
+   "resolution_due": "2026-09-30T15:00:00+03:00",
+   "arrived_at": null,
+   "completed_at": null,
+   "closed_at": null,
+   "status": 3,
+   "scanned_code": null,
+   "result_text": null,
+   "cancel_reason": null,
+   "time_trusted": true
+  },
+  {
+   "id": 8,
+   "number": "З-2609-0137",
+   "contract_id": 2,
+   "site_id": 4,
+   "equipment_id": 4,
+   "work_type_id": 3,
+   "sla_level_id": 2,
+   "dispatcher_id": 2,
+   "engineer_id": 1,
+   "parent_id": null,
+   "description": "Вышел из строя коммутатор доступа в серверной, часть рабочих мест без сети.",
+   "registered_at": "2026-09-25T16:30:00+03:00",
+   "reaction_due": "2026-09-28T11:30:00+03:00",
+   "resolution_due": "2026-09-30T13:30:00+03:00",
+   "arrived_at": null,
+   "completed_at": null,
+   "closed_at": null,
+   "status": 2,
+   "scanned_code": null,
+   "result_text": null,
+   "cancel_reason": null,
+   "time_trusted": true
+  },
+  {
+   "id": 9,
+   "number": "З-2609-0138",
+   "contract_id": 3,
+   "site_id": 5,
+   "equipment_id": 7,
+   "work_type_id": 5,
+   "sla_level_id": 3,
+   "dispatcher_id": 2,
+   "engineer_id": 1,
+   "parent_id": null,
+   "description": "Плановое ТО второго ИБП.",
+   "registered_at": "2026-09-25T17:10:00+03:00",
+   "reaction_due": "2026-09-29T17:10:00+03:00",
+   "resolution_due": "2026-10-02T17:10:00+03:00",
+   "arrived_at": null,
+   "completed_at": null,
+   "closed_at": null,
+   "status": 2,
+   "scanned_code": null,
+   "result_text": null,
+   "cancel_reason": null,
+   "time_trusted": true
+  },
+  {
+   "id": 10,
+   "number": "З-2609-0139",
+   "contract_id": 1,
+   "site_id": 1,
+   "equipment_id": 2,
+   "work_type_id": 5,
+   "sla_level_id": 1,
+   "dispatcher_id": 2,
+   "engineer_id": 1,
+   "parent_id": null,
+   "description": "ИБП подаёт звуковой сигнал, работает от батарей.",
+   "registered_at": "2026-09-25T17:40:00+03:00",
+   "reaction_due": "2026-09-25T19:40:00+03:00",
+   "resolution_due": "2026-09-26T01:40:00+03:00",
+   "arrived_at": null,
+   "completed_at": null,
+   "closed_at": null,
+   "status": 2,
+   "scanned_code": null,
+   "result_text": null,
+   "cancel_reason": null,
+   "time_trusted": true
+  }
+ ],
+ "checklist_result": [
+  {
+   "id": "ac17921f-f4e4-54aa-9a2f-1c190642a751",
+   "request_id": 1,
+   "checklist_item_id": 16,
+   "done": true,
+   "comment": null,
+   "done_at": "2026-09-17T13:10:00+03:00"
+  },
+  {
+   "id": "e1932627-35c2-5553-ade2-7ef63bfa06fd",
+   "request_id": 1,
+   "checklist_item_id": 17,
+   "done": true,
+   "comment": null,
+   "done_at": "2026-09-17T13:10:00+03:00"
+  },
+  {
+   "id": "ff71c16a-3c9a-5d8c-9d24-7df0b3166907",
+   "request_id": 1,
+   "checklist_item_id": 18,
+   "done": true,
+   "comment": null,
+   "done_at": "2026-09-17T13:10:00+03:00"
+  },
+  {
+   "id": "e253f48e-4ab9-5b05-9830-d01dc6c65066",
+   "request_id": 2,
+   "checklist_item_id": 5,
+   "done": true,
+   "comment": null,
+   "done_at": "2026-09-17T14:30:00+03:00"
+  },
+  {
+   "id": "4b23532a-feea-513f-a76f-16fb3cda81d3",
+   "request_id": 2,
+   "checklist_item_id": 6,
+   "done": true,
+   "comment": null,
+   "done_at": "2026-09-17T14:30:00+03:00"
+  },
+  {
+   "id": "30776d77-ff30-54bf-bac6-509446bca509",
+   "request_id": 2,
+   "checklist_item_id": 7,
+   "done": true,
+   "comment": null,
+   "done_at": "2026-09-17T14:30:00+03:00"
+  },
+  {
+   "id": "812dfe53-eab3-5454-ba87-d0f7f084aa88",
+   "request_id": 5,
+   "checklist_item_id": 13,
+   "done": true,
+   "comment": null,
+   "done_at": "2026-09-25T10:30:00+03:00"
+  },
+  {
+   "id": "66fd8ebf-99ea-538a-89cf-624542b4437b",
+   "request_id": 5,
+   "checklist_item_id": 14,
+   "done": true,
+   "comment": null,
+   "done_at": "2026-09-25T10:30:00+03:00"
+  },
+  {
+   "id": "6b41c700-55ca-5570-858e-19eed36c4bc6",
+   "request_id": 6,
+   "checklist_item_id": 1,
+   "done": true,
+   "comment": null,
+   "done_at": "2026-09-28T08:55:00+03:00"
+  }
+ ],
+ "work_log": [
+  {
+   "id": "a5fcede9-49f5-5719-824d-72ea5e657872",
+   "request_id": 1,
+   "employee_id": 1,
+   "kind": 1,
+   "started_at": "2026-09-17T10:15:00+03:00",
+   "ended_at": "2026-09-17T11:00:00+03:00",
+   "time_trusted": true
+  },
+  {
+   "id": "a505883e-903c-5518-9aa0-03c992ca4b44",
+   "request_id": 1,
+   "employee_id": 1,
+   "kind": 2,
+   "started_at": "2026-09-17T11:00:00+03:00",
+   "ended_at": "2026-09-17T13:10:00+03:00",
+   "time_trusted": true
+  },
+  {
+   "id": "c6f0d84b-fe43-58ab-b04b-bbf523fa1651",
+   "request_id": 2,
+   "employee_id": 1,
+   "kind": 1,
+   "started_at": "2026-09-17T11:20:00+03:00",
+   "ended_at": "2026-09-17T12:05:00+03:00",
+   "time_trusted": true
+  },
+  {
+   "id": "7b9c53e0-9ab7-5270-8572-69c113c6a0ff",
+   "request_id": 2,
+   "employee_id": 1,
+   "kind": 2,
+   "started_at": "2026-09-17T12:05:00+03:00",
+   "ended_at": "2026-09-17T14:30:00+03:00",
+   "time_trusted": true
+  },
+  {
+   "id": "5feca02a-55b2-529b-89f8-6b57a7860de6",
+   "request_id": 4,
+   "employee_id": 1,
+   "kind": 1,
+   "started_at": "2026-09-22T09:15:00+03:00",
+   "ended_at": "2026-09-22T10:00:00+03:00",
+   "time_trusted": true
+  },
+  {
+   "id": "6df05d27-0487-5055-81fd-df490f819aaf",
+   "request_id": 4,
+   "employee_id": 1,
+   "kind": 2,
+   "started_at": "2026-09-22T10:00:00+03:00",
+   "ended_at": "2026-09-22T11:30:00+03:00",
+   "time_trusted": true
+  },
+  {
+   "id": "d09f551c-95b9-50f6-8f5e-81779151d652",
+   "request_id": 5,
+   "employee_id": 1,
+   "kind": 1,
+   "started_at": "2026-09-25T09:00:00+03:00",
+   "ended_at": "2026-09-25T09:40:00+03:00",
+   "time_trusted": true
+  },
+  {
+   "id": "a5d74145-1196-57df-9c00-66a651b1da78",
+   "request_id": 5,
+   "employee_id": 1,
+   "kind": 2,
+   "started_at": "2026-09-25T09:40:00+03:00",
+   "ended_at": "2026-09-25T10:30:00+03:00",
+   "time_trusted": true
+  },
+  {
+   "id": "89769c52-b3bd-5a63-9ac3-40ce0b701838",
+   "request_id": 6,
+   "employee_id": 1,
+   "kind": 1,
+   "started_at": "2026-09-28T07:50:00+03:00",
+   "ended_at": "2026-09-28T08:35:00+03:00",
+   "time_trusted": true
+  },
+  {
+   "id": "150f75ce-7e01-5f59-bf5f-3ee6e81a846a",
+   "request_id": 6,
+   "employee_id": 1,
+   "kind": 2,
+   "started_at": "2026-09-28T08:35:00+03:00",
+   "ended_at": null,
+   "time_trusted": true
+  },
+  {
+   "id": "ef111c7b-9ca6-5ab9-bcb0-6e141f56bf01",
+   "request_id": 7,
+   "employee_id": 1,
+   "kind": 1,
+   "started_at": "2026-09-28T09:50:00+03:00",
+   "ended_at": null,
+   "time_trusted": true
+  }
+ ],
+ "accounts": [
+  {
+   "login": "engineer",
+   "salt": "aadcd0089b33ea7cff5adfe047d1b068",
+   "iterations": 120000,
+   "hash": "67a5e4d5429fe1e538610b0d7e3da833e9a4089b061d8c37d31fe8d99fad4704"
+  },
+  {
+   "login": "dispatcher",
+   "salt": "838a561166bb929186b10875f9734fe4",
+   "iterations": 120000,
+   "hash": "54c175cef3223ddd164421d94900af745951b045e552e3013261e02f0468423e"
+  },
+  {
+   "login": "head",
+   "salt": "fa5d643e59891482bb28b05c160fc792",
+   "iterations": 120000,
+   "hash": "59bc50ec3142cd7057392c41546e7dcf5bfa3b72c5aa39e8514c68d41316d8c5"
+  }
+ ]
+}
